@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#172554">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>記憶ラボ｜暗記アプリ</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#dfe4ee;--primary:#2547a8;--primary2:#e8edff;--good:#137547;--bad:#b42318;--warn:#8a5b00;--shadow:0 8px 26px #1725540d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;line-height:1.5}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-weight:650;background:#e9edf5;color:var(--ink)}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--primary);color:white}.soft{background:var(--primary2);color:var(--primary)}.danger{background:#ffebe9;color:var(--bad)}.small{font-size:.86rem;padding:8px 10px}.app{max-width:780px;margin:auto;padding:0 14px 38px}.top{margin:0 -14px 14px;padding:20px 18px 16px;background:#172554;color:#fff;border-radius:0 0 22px 22px}.brand{font-size:1.45rem;font-weight:800;letter-spacing:.02em}.sub{color:#d6defb;font-size:.9rem}.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:14px 0}.tab{padding:10px 4px;font-size:.88rem;background:#e6eaf3}.tab.active{background:var(--primary);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.between{display:flex;justify-content:space-between;gap:10px;align-items:center}.muted{color:var(--muted)}.tiny{font-size:.8rem}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#f8f9fc;border:1px solid var(--line);padding:12px;border-radius:14px}.num{font-size:1.35rem;font-weight:800}.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:120px}input,select,textarea{border:1px solid #cbd3e1;border-radius:10px;padding:10px 11px;background:white;color:var(--ink);width:100%}textarea{min-height:100px;resize:vertical}.sectiontitle{font-size:1.05rem;font-weight:800;margin:0 0 10px}.word{font-size:clamp(1.8rem,7vw,2.5rem);font-weight:800;text-align:center;margin:28px 0 12px;overflow-wrap:anywhere;line-height:1.3}.study-face{min-height:250px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 4px}#studyCard{touch-action:pan-y;user-select:none;-webkit-user-select:none}.study-face{cursor:pointer;border-radius:14px;transition:transform .18s,background .18s}.study-face.flipped{background:#f2f5ff}.study-card-swipe-left{animation:swipeOutLeft .28s cubic-bezier(.2,.75,.25,1) both;pointer-events:none}.study-card-swipe-right{animation:swipeOutRight .28s cubic-bezier(.2,.75,.25,1) both;pointer-events:none}@keyframes swipeOutLeft{to{transform:translateX(-115%) rotate(-7deg);opacity:0}}@keyframes swipeOutRight{to{transform:translateX(115%) rotate(7deg);opacity:0}}@media(prefers-reduced-motion:reduce){.study-card-swipe-left,.study-card-swipe-right{animation:none}}.swipehint{font-size:.82rem;text-align:center;color:var(--muted);margin-top:8px}.bulkbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.tapnote{font-size:.82rem;color:var(--muted);text-align:center}.gradebtn{min-height:58px;font-size:1rem}.gradebtn strong{display:block;font-size:1.05rem}.gradebtn span{font-size:.76rem;font-weight:500;opacity:.85}.importgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.previewtable{width:100%;border-collapse:collapse;font-size:.82rem}.previewtable th,.previewtable td{border:1px solid var(--line);padding:7px;text-align:left;overflow-wrap:anywhere}.previewwrap{overflow-x:auto}.similar-candidate-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.similar-candidate{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.similar-candidate-top{display:flex;align-items:flex-start;gap:8px}.similar-candidate-top input{width:auto;margin-top:5px;flex-shrink:0}.similar-candidate-detail{font-size:.82rem;color:var(--muted);margin:6px 0 0 25px;overflow-wrap:anywhere}.import-map-row{display:grid;grid-template-columns:minmax(110px,1fr) minmax(100px,1fr) auto;gap:7px;align-items:center;margin:7px 0}.import-map-row button{padding:8px 10px}.choice-next{grid-column:1/-1;width:100%;min-height:52px}.answer{font-size:1.25rem;font-weight:700;text-align:center;padding:12px 0}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.actions button{min-height:48px}.confidence{display:flex;gap:7px}.confidence button{flex:1;padding:10px 4px}.notice{padding:11px 12px;border-radius:12px;background:#fff8e6;color:#76500a;font-size:.88rem}.goodtext{color:var(--good)}.badtext{color:var(--bad)}.hidden{display:none!important}.progress{height:8px;background:#e6eaf2;border-radius:20px;overflow:hidden}.progress span{display:block;height:100%;background:var(--primary);width:0}.listitem{border-top:1px solid var(--line);padding:12px 0}.listitem:first-child{border-top:0}.pill{font-size:.75rem;border-radius:30px;padding:3px 8px;background:#eef1f7;color:#475467;display:inline-block}.pill.due{background:#fff0d6;color:#8a5b00}.pill.master{background:#dcfce7;color:#166534}.footer{font-size:.8rem;color:var(--muted);padding:10px 2px}.filelabel{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:12px;padding:10px 13px;background:#e9edf5;font-weight:650;cursor:pointer}.filelabel input{display:none}.hr{border:0;border-top:1px solid var(--line);margin:14px 0}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#172033;color:#fff;border-radius:12px;padding:11px 16px;max-width:90vw;box-shadow:var(--shadow);z-index:5}.kbd{font-family:monospace;background:#f0f2f6;border-radius:5px;padding:2px 5px}.word-subtabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}.word-subtab{font-size:.83rem;padding:10px 4px;background:#e6eaf3}.word-subtab.active{background:var(--primary);color:#fff}.word-subpanel{display:none}.word-subpanel.active{display:block}.deck-row{border-top:1px solid var(--line);padding:12px 0}.deck-row:first-child{border-top:0}.deck-actions{display:flex;gap:7px;margin-top:8px}.deck-name-input{min-width:0;flex:1}.similar-selected-name{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px}.candidate-count{font-size:.8rem;color:var(--muted)}.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:10px}.compare-word{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;min-width:0;overflow-wrap:anywhere}.compare-word strong{font-size:1.05rem}.compare-word .meaning{font-weight:650;margin:6px 0}.map-node{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;margin:7px 0}.map-branch{margin:8px 0 8px 12px;border-left:3px solid #c7d2fe;padding-left:10px}.map-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.map-chip{background:#eef2ff;color:#263d8f;border-radius:999px;padding:5px 9px;font-size:.82rem}.map-resultbtn{text-align:left;width:100%;font-size:.9rem}.map-resultbtn small{display:block;color:var(--muted);font-weight:400}@media(min-width:520px){.similar-selected-name{grid-template-columns:minmax(0,1fr) auto}}@media(min-width:600px){.top{margin-top:14px;border-radius:22px}.app{padding-bottom:50px}.tabs{grid-template-columns:repeat(5,1fr)}}
+.install-steps{padding-left:22px;margin:8px 0}.install-steps li{margin:6px 0}.install-state{padding:10px 12px;border-radius:12px;background:#eef3ff;color:#203b82;font-size:.9rem}.install-actions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}details summary{cursor:pointer;font-weight:700;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand">記憶ラボ <span style="font-size:.75rem;font-weight:600;background:#35477d;padding:4px 7px;border-radius:8px">v11.0</span></div>
+  <div class="sub">覚えた回数ではなく、思い出せる確率を育てる。</div>
+  <div class="sub" style="margin-top:8px">英単語と古文単語は別々に学習。記録はこの端末のブラウザに保存されます。</div>
+</header>
+<nav class="tabs" aria-label="メニュー">
+<button class="tab active" data-tab="learn">学習</button><button class="tab" data-tab="words">単語管理</button><button class="tab" data-tab="stats">分析</button><button class="tab" data-tab="import">データ</button><button class="tab" data-tab="settings">設定</button>
+</nav>
+
+<section id="learn" class="panel active">
+ <div class="card" style="padding:12px;margin-top:10px">
+  <div class="sectiontitle">今回学習する範囲</div>
+  <div class="row"><div class="field"><label for="learnRangeStart">開始番号</label><input id="learnRangeStart" type="number" min="1" value="1"></div><div class="field"><label for="learnRangeEnd">終了番号</label><input id="learnRangeEnd" type="number" min="1" placeholder="最後まで"></div><button class="primary" id="applyRangeBtn">この範囲で学習</button></div>
+  <div class="muted tiny" id="rangeInfo">登録順の番号で範囲を指定できます。</div>
+ </div>
+ <div class="row" style="margin:10px 0 12px">
+  <div class="field"><label for="subject">学習する単語帳</label><select id="subject"><option value="en">英単語</option><option value="ko">古文単語</option></select></div>
+  <div class="field"><label for="mode">出題形式</label><select id="mode"><option value="recall">英語→日本語</option><option value="reverse">日本語→英語</option><option value="choice">四択</option></select></div>
+  <div class="field"><label for="studyOrder">出題順（形式とは別）</label><select id="studyOrder"><option value="priority">復習優先順</option><option value="random">ランダム</option></select></div>
+ </div>
+ <div class="muted tiny" style="margin:-3px 0 10px">出題形式と出題順は独立しています。英語→日本語・日本語→英語・四択のどれを選んでも、単語の並び順だけをランダムにできます。</div>
+ <div class="statgrid">
+  <div class="stat"><div class="muted tiny">今日の回答</div><div class="num" id="todayCount">0</div></div>
+  <div class="stat"><div class="muted tiny">復習待ち</div><div class="num" id="dueCount">0</div></div>
+  <div class="stat"><div class="muted tiny">登録語数</div><div class="num" id="totalCount">0</div></div>
+ </div>
+ <div class="progress" style="margin:13px 0 4px"><span id="sessionProgress"></span></div>
+ <div class="between tiny muted"><span id="sessionLabel">学習を始めましょう</span><span id="queueLabel"></span></div>
+ <div class="card" id="studyCard">
+  <div class="between"><span class="pill" id="wordTag">英単語</span><span class="tiny muted" id="elapsed">回答時間 0.0秒</span></div>
+  <div class="study-face" id="flipCard" role="button" tabindex="0" aria-label="カードを裏返す"><div class="word" id="prompt">単語を登録してください</div><div class="tapnote" id="tapNote">カードをタップして裏返す</div></div><div class="swipehint" id="swipeHint">答えを見たら、右スワイプ＝思い出せた／左スワイプ＝まだ覚えていない</div>
+  <div id="hintLine" class="muted tiny" style="text-align:center"></div>
+  <div id="answerArea" class="hidden">
+   <hr class="hr"><div class="answer" id="answerText"></div>
+   <div class="muted" id="exampleText" style="text-align:center;white-space:pre-wrap"></div>
+   <div class="muted tiny" id="historyText" style="text-align:center;margin-top:8px"></div>
+   <div class="tapnote" style="margin-top:12px">もう一度タップすると表面に戻ります。右スワイプ＝思い出せた／左スワイプ＝まだ覚えていない</div>
+  </div>
+  <div id="choiceArea" class="actions hidden" style="margin-top:14px"></div>
+  <div class="row hidden" id="showRow" style="margin-top:16px"><button class="primary" id="showBtn" style="width:100%">答えを表示</button></div>
+  <div class="row hidden" id="nextRow" style="margin-top:12px"><button class="primary" id="nextBtn" style="width:100%">もう一周する</button></div>
+  <div id="emptyState" class="notice hidden" style="margin-top:14px">この単語帳に単語がありません。単語管理から追加するか、データ画面でCSVを読み込んでください。</div>
+ </div>
+ <div class="card" id="similarCard"><div class="sectiontitle">似た単語・混同注意</div><div id="similarList" class="muted tiny">単語を登録すると、綴りや意味が似た語をここに表示します。</div></div>
+ <div class="card" id="compareFeatureCard">
+  <div class="between"><div class="sectiontitle" style="margin:0">混同単語の比較モード</div><button class="primary small" type="button" id="openCompareBtn">この単語を比較</button></div>
+  <p class="muted tiny">意味や綴りが似ている単語を同じ画面に並べ、訳・例文・追加情報を比較します。候補は自動で提案しますが、比較する単語は自分でも検索して選べます。</p>
+  <div id="comparePanel" class="hidden" style="margin-top:12px">
+   <div class="field"><label for="compareWordSearch">比較したい単語を検索（同じ単語帳内）</label><input id="compareWordSearch" placeholder="例：claim、主張する、argue"></div>
+   <div class="row" style="margin-top:8px"><button class="soft small" id="suggestCompareBtn" type="button">現在の単語に似た候補</button><button class="soft small" id="clearCompareBtn" type="button">選択解除</button><span id="compareSelectedCount" class="candidate-count">0語選択中</span></div>
+   <div id="compareCandidateList" class="similar-candidate-list"></div>
+   <div class="sectiontitle" style="margin-top:14px">比較結果</div><div id="compareResults" class="compare-grid"><p class="muted tiny">比較する単語を2語以上選択してください。</p></div>
+   <p class="muted tiny">比較結果は登録済みの訳・例文・追加情報を表示します。語の微妙なニュアンスは、例文や辞書で確認してください。</p>
+  </div>
+ </div>
+ <div class="card">
+  <div class="sectiontitle">学習の進め方</div>
+  <div class="muted" style="font-size:.9rem">カードは何度でも表・裏を切り替えられます。一度答えを見れば、表面に戻しても左右スワイプで回答できます。四択は選択後に意味・補足を表示し、約7秒後に自動で次へ進みます。意味・補足を表示し、次へ進むボタンは選択肢と同じ位置に表示します。</div>
+ </div>
+</section>
+
+<section id="words" class="panel">
+ <nav class="word-subtabs" aria-label="単語管理の画面">
+  <button class="word-subtab active" data-word-view="wordView-list">単語一覧</button>
+  <button class="word-subtab" data-word-view="wordView-add">追加</button>
+  <button class="word-subtab" data-word-view="wordView-similar">似た単語帳</button>
+  <button class="word-subtab" data-word-view="wordView-decks">単語帳管理</button>
+ </nav>
+ <div id="wordView-list" class="word-subpanel active">
+  <div class="card">
+   <div class="between"><div class="sectiontitle" style="margin:0">登録語一覧</div><select id="listSubject" style="width:auto"><option value="en">英単語</option><option value="ko">古文単語</option><option value="all">すべて</option></select></div>
+   <input id="searchWords" placeholder="単語・意味で検索" style="margin:12px 0">
+   <div class="bulkbar"><label><input id="selectAllWords" type="checkbox" style="width:auto"> 表示中をすべて選択</label><button class="danger small" id="deleteSelectedBtn">選択した単語を削除</button><span id="selectedCount" class="muted tiny">0語選択中</span></div>
+   <div id="wordList"></div>
+  </div>
+ </div>
+ <div id="wordView-add" class="word-subpanel">
+  <div class="card">
+   <div class="sectiontitle">単語を追加</div>
+   <div class="row"><div class="field"><label for="addSubject">単語帳</label><select id="addSubject"><option value="en">英単語</option><option value="ko">古文単語</option></select></div></div>
+   <div class="row" style="margin-top:8px"><div class="field"><label for="front">単語・見出し語</label><input id="front" placeholder="例：abandon / あはれなり"></div><div class="field"><label for="back">意味</label><input id="back" placeholder="例：捨てる / しみじみと趣深い"></div></div>
+   <div class="field" style="margin-top:8px"><label for="example">例文・補足（任意）</label><input id="example" placeholder="例文、品詞、複数の意味など"></div>
+   <div class="between" style="margin-top:12px"><strong>追加情報（任意・項目は自由）</strong><button class="soft small" id="addExtraFieldBtn" type="button">＋ 項目を追加</button></div><div id="extraFields"></div><p class="muted tiny">例：発音、品詞、語源、派生語、活用、覚え方、出典など。必要な項目を自由に増やせます。</p>
+   <button class="primary" id="addBtn" style="width:100%;margin-top:12px">単語を追加</button>
+  </div>
+ </div>
+ <div id="wordView-similar" class="word-subpanel">
+  <div class="card">
+   <div class="between"><div class="sectiontitle" style="margin:0">似た単語帳の候補</div><button class="primary small" id="buildSimilarDecksBtn">候補を探す</button></div>
+   <p class="muted tiny">接頭語・接尾語・意味の近さ・綴りの近さを候補として表示します。候補は重複することがあります。関連する候補を複数選ぶと、重複単語を除いて1冊にまとめます。候補は登録済み単語から探します。意味の近さは登録訳と内蔵語彙ルールによる推定なので、作成前に中身を確認してください。</p>
+   <div class="row" style="margin-top:10px">
+    <div class="field"><label for="similarSearch">候補を検索</label><input id="similarSearch" placeholder="例：un-、-tion、主張する、abandon"></div>
+    <div class="field"><label for="similarTypeFilter">種類で絞り込み</label><select id="similarTypeFilter"><option value="all">すべての種類</option><option value="接頭語">接頭語</option><option value="接尾語">接尾語</option><option value="共通語根">共通語根・語幹</option><option value="意味が近い語">意味が近い語</option><option value="綴りが似た語">綴りが似た語</option></select></div>
+   </div>
+   <div id="similarDeckStatus" class="muted tiny" style="margin-top:8px">「候補を探す」を押すと、登録済み単語から候補を作ります。</div>
+   <div id="similarGroupList" class="similar-candidate-list"></div>
+   <div class="row" style="margin-top:12px"><button class="soft small" id="selectVisibleSimilarBtn">表示中をすべて選択</button><button class="soft small" id="clearSimilarSelectionBtn">選択解除</button><span id="selectedSimilarCount" class="candidate-count">0候補選択中</span></div>
+   <div class="similar-selected-name"><div class="field"><label for="similarCombinedName">作成する単語帳の名前（あとから変更可能）</label><input id="similarCombinedName" placeholder="例：主張する・意見を述べる"></div><button class="primary" id="createSelectedSimilarDecksBtn" type="button">選択した候補を1冊にまとめる</button></div>
+   <p class="muted tiny">例：「意味が近い語：〜と主張する」と「意味が近い語：主張する」を両方選ぶと、重複を除いて1冊にまとめます。作成した単語帳は「単語帳管理」で名前変更・削除できます。</p>
+  </div>
+  <div class="card" id="wordMapCard">
+   <div class="sectiontitle">接頭語・語根・接尾語の単語マップ</div>
+   <p class="muted tiny">登録語の中から、共通する接頭語・接尾語・推定語幹や意味の近い語をつないで表示します。形だけからの推定なので、語源を確定するものではありません。</p>
+   <div class="field"><label for="wordMapSearch">単語を検索</label><input id="wordMapSearch" placeholder="例：rebuild、claim、unhappy"></div>
+   <div id="wordMapSearchResults" class="similar-candidate-list"></div>
+   <div id="wordMapResult" class="wordmap-result muted tiny">単語を検索して、候補を選択してください。</div>
+  </div>
+ </div>
+ <div id="wordView-decks" class="word-subpanel">
+  <div class="card">
+   <div class="sectiontitle">単語帳（教科）を追加</div>
+   <div class="row"><div class="field"><label for="newCategoryName">新しい単語帳の名前</label><input id="newCategoryName" placeholder="例：生物用語、歴史年号、化学式"></div><button class="primary" id="addCategoryBtn">追加</button></div>
+   <p class="muted tiny">英単語・古文単語以外にも、自由な単語帳を作成できます。</p>
+  </div>
+  <div class="card">
+   <div class="sectiontitle">単語帳の名前変更・削除</div>
+   <p class="muted tiny">自分で作った単語帳や、似た単語から作成した単語帳を管理できます。単語帳を削除すると、その単語帳内の単語と回答履歴も削除されます。元の単語は削除されません。</p>
+   <input id="deckManagerSearch" placeholder="単語帳名で検索" style="margin:10px 0"><div id="deckManagerCount" class="muted tiny"></div><div id="deckManagerList"></div>
+  </div>
+ </div>
+</section>
+
+<section id="stats" class="panel">
+ <div class="card">
+  <div class="sectiontitle">学習状況</div>
+  <div class="statgrid">
+   <div class="stat"><div class="muted tiny">累計回答</div><div class="num" id="statAnswers">0</div></div>
+   <div class="stat"><div class="muted tiny">正答率</div><div class="num" id="statAccuracy">—</div></div>
+   <div class="stat"><div class="muted tiny">習得判定</div><div class="num" id="statMastered">0</div></div>
+  </div>
+  <div class="sectiontitle" style="margin-top:18px">忘れやすい単語</div><div id="weakList"></div>
+  <hr class="hr"><div class="sectiontitle">学習履歴（直近7日）</div><div id="historySummary"></div><div class="sectiontitle" style="margin-top:14px">直近の回答（最大5件）</div><div id="recentList"></div><button id="showAllHistoryBtn" class="soft small" style="width:100%;margin-top:8px">過去の回答履歴をすべて表示</button><div id="allHistory" class="hidden"></div>
+ </div>
+ <div class="card">
+  <div class="sectiontitle">習得判定について</div>
+  <p class="muted" style="font-size:.9rem">この試作品では、複数回の正答・自信・回答時間・日をまたいだ再テストを使って簡易判定します。これは個人データに合わせて調整するための初期ルールで、科学的に最適だと保証するものではありません。</p>
+ </div>
+</section>
+
+<section id="import" class="panel">
+ <div class="card">
+  <div class="sectiontitle">Excel／CSVから単語を読み込む</div>
+  <p class="muted" style="font-size:.9rem">列の順番が違っていても「単語」「意味」「補足」を自動判定します。その他の列は、発音・品詞・語源などの追加項目として必要な数だけ選択できます。番号列は通常候補から除外します。</p>
+  <label class="filelabel" style="margin-top:8px;width:100%">Excel／CSVファイルを選択<input id="csvFile" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"></label>
+  <div id="importResult" class="muted tiny" style="margin-top:8px"></div>
+  <div id="importPreview" class="hidden" style="margin-top:14px">
+   <div class="sectiontitle">読み込み内容の確認</div>
+   <div class="field"><label for="importSubject">読み込み先の単語帳</label><select id="importSubject"><option value="en">英単語</option><option value="ko">古文単語</option></select></div>
+   <div class="importgrid" style="margin-top:10px">
+    <div class="field"><label for="colFront">単語の列</label><select id="colFront"></select></div>
+    <div class="field"><label for="colBack">意味の列</label><select id="colBack"></select></div>
+    <div class="field" style="grid-column:1/-1"><label for="colExample">補足・例文の列（任意）</label><select id="colExample"></select></div>
+   </div>
+   <div style="margin-top:12px">
+    <div class="between"><strong>追加項目として読み込む列</strong><button class="soft small" id="addImportMappingBtn" type="button">＋ 項目を追加</button></div>
+    <p class="muted tiny">発音・品詞・語源・派生語など、必要な数だけ増やせます。列と保存名を選んでください。最初は単語・意味・補足以外の列を自動で候補にします。</p>
+    <div id="importExtraMappings"></div>
+   </div>
+   <div id="mappingNote" class="muted tiny" style="margin:8px 0"></div>
+   <div class="previewwrap"><table class="previewtable"><thead><tr id="previewHeader"><th>単語</th><th>意味</th><th>補足</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+   <button class="primary" id="importConfirm" style="width:100%;margin-top:12px">この内容で読み込む</button>
+  </div>
+  <hr class="hr">
+  <div class="sectiontitle">CSVテンプレート</div>
+  <pre style="white-space:pre-wrap;background:#f7f8fb;padding:12px;border-radius:10px;font-size:.84rem">単語,意味,補足
+abandon,捨てる,abandon a plan
+あはれなり,しみじみと趣深い,文脈によって意味が変わる</pre>
+  <button id="templateBtn" class="soft" style="width:100%">CSVテンプレートを保存</button>
+ </div>
+ <div class="card">
+  <div class="sectiontitle">バックアップ・移行</div>
+  <p class="muted" style="font-size:.9rem">単語、回答履歴、復習予定をJSONで保存できます。ブラウザのデータ消去や端末変更に備え、定期的に書き出してください。</p>
+  <button class="primary" id="exportBtn" style="width:100%">全データをJSONで書き出す</button>
+  <label class="filelabel" style="margin-top:9px;width:100%">JSONバックアップを復元<input id="jsonFile" type="file" accept=".json,application/json"></label>
+  <div id="backupResult" class="muted tiny" style="margin-top:8px"></div>
+ </div>
+</section>
+
+<section id="settings" class="panel">
+ <div class="card" id="installCard">
+  <div class="sectiontitle">ホーム画面に追加</div>
+  <p class="muted" style="font-size:.9rem">ホーム画面からアプリのように起動できるようにします。インストールできるかは、開いている場所とChromeの状態によります。</p>
+  <div id="installStatus" class="install-state" role="status">インストール方法を確認しています…</div>
+  <div class="install-actions">
+   <button class="primary" id="installAppBtn" type="button">ホーム画面への追加方法</button>
+  </div>
+  <details id="installInstructions" style="margin-top:8px">
+   <summary>Android版Chromeでの手順</summary>
+   <ol class="install-steps">
+    <li>まず、HTTPSで公開された記憶ラボのURLをChromeで開きます。</li>
+    <li>Chrome右上の「︙」メニューを開きます。</li>
+    <li>「アプリをインストール」または「ホーム画面に追加」を選び、画面の案内に従います。表示名はChromeのバージョンなどで異なります。</li>
+   </ol>
+   <p class="muted tiny">ダウンロードしたHTMLファイルを直接開いている場合は、PWAとしてのインストールはできません。下の配布ZIPにHTTPS公開用ファイルとREADMEを同梱しています。</p>
+  </details>
+ </div>
+ <div class="card">
+  <div class="sectiontitle">学習設定</div>
+  <div class="field"><label for="newLimit">新出語の出題上限（0＝無制限）</label><input type="number" id="newLimit" min="0" max="1000000" value="0"></div>
+  <p class="muted tiny">1日あたりの上限はありません。0なら新出語をすべて出題対象にします。セッション終了後も、もう一周して何度でも学習できます。</p>
+  <div class="field"><label for="rangeStart">出題範囲の開始（登録順）</label><input type="number" id="rangeStart" min="1" value="1"></div>
+  <div class="field" style="margin-top:8px"><label for="rangeEnd">出題範囲の終了（登録順。空欄なら最後まで）</label><input type="number" id="rangeEnd" min="1" placeholder="最後まで"></div>
+  <button class="primary" id="saveSettings" style="width:100%;margin-top:12px">設定を保存</button>
+ </div>
+ <div class="card">
+  <div class="sectiontitle">この試作品の制限</div>
+  <ul class="muted" style="font-size:.9rem;padding-left:20px">
+   <li>保存先は現在のブラウザ内のみ。端末間の自動同期は未実装。</li>
+   <li>クラウド同期はサーバーとアカウント設定が必要なため未実装。</li>
+   <li>似た単語帳は候補を検索・選択して作成できます。意味の近さは内蔵ルールによる推定なので、候補の確認が必要です。</li>
+   <li>四択は登録済み語から候補を作る簡易方式。</li>
+   <li>Excelは先頭シートを読み込みます。Excelライブラリが未取得の場合はオンライン接続が必要です。列の自動判定後、読み込み前にプレビューできます。</li>
+  </ul>
+  <button class="danger" id="clearBtn" style="width:100%">このブラウザ内のデータをすべて削除</button>
+ </div>
+</section>
+<div class="footer">記憶ラボ v12.0 · データは端末内に保存 · 学習成果や最適な復習間隔を保証するものではありません</div>
+</div>
+<div id="toast" class="toast hidden" role="status"></div>
+<script>
+(() => {
+const KEY='kioku-lab-v1';
+const $=id=>document.getElementById(id);
+// 単語管理内のサブ画面を確実に切り替える
+ document.querySelectorAll('.word-subtab[data-word-view]').forEach(tab=>tab.addEventListener('click',()=>{
+  const target=tab.dataset.wordView;
+  document.querySelectorAll('.word-subtab').forEach(t=>t.classList.toggle('active',t===tab));
+  document.querySelectorAll('.word-subpanel').forEach(panel=>panel.classList.toggle('active',panel.id===target));
+  if(target==='wordView-list')renderWords();
+  if(target==='wordView-decks')renderDeckManagerList();
+ }));
+// Main navigation: explicitly switch the active tab and its panel.
+document.querySelectorAll('.tab[data-tab]').forEach(tab=>{
+ tab.addEventListener('click',()=>{
+  const target=tab.dataset.tab;
+  if(!target||!$(target))return;
+  document.querySelectorAll('.tab[data-tab]').forEach(t=>{
+   const active=t===tab;t.classList.toggle('active',active);t.setAttribute('aria-selected',active?'true':'false');
+  });
+  document.querySelectorAll('.panel').forEach(panel=>panel.classList.toggle('active',panel.id===target));
+  if(target==='stats')renderAnalysis();
+  if(target==='words')renderWords();
+  if(target==='import')$('importResult').textContent=$('importResult').textContent||'CSVまたはExcelファイルを選択してください。';
+ });
+ tab.setAttribute('aria-selected',tab.classList.contains('active')?'true':'false');
+});
+const now=()=>Date.now();
+let db={version:2,words:[],logs:[],subjects:[{id:'en',name:'英単語'},{id:'ko',name:'古文単語'}],settings:{newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority'},similarGroups:[]};
+let current=null, revealed=false, faceBack=false, choiceTimer=null, startedAt=0, sessionQueue=[], sessionDone=0, confidence=2, lastChoice=null, importRows=[], importHeaders=[], allHistoryVisible=false, selectedWordIds=new Set(), sessionRange={start:1,end:''}, similarCandidates=[], selectedSimilarIds=new Set(), similarSearchDone=false, swipeTransitioning=false, swipeFallback=null, compareSelectedIds=new Set(), comparePanelOpen=false, wordMapSelectedId=null;
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.words)&&Array.isArray(x.logs)){db={...db,...x};if(Number(x.version||1)<2){db.settings={...(db.settings||{}),newLimit:0};db.version=2;}}db.settings={newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority',...(db.settings||{})};if(!Array.isArray(db.subjects))db.subjects=[{id:'en',name:'英単語'},{id:'ko',name:'古文単語'}];db.subjects.forEach(s=>{if(s.generatedSimilar&&typeof s.activeSimilar!=='boolean')s.activeSimilar=false});db.words.forEach(w=>{if(!db.subjects.some(s=>s.id===w.subject))db.subjects.push({id:w.subject,name:w.subject==='en'?'英単語':w.subject==='ko'?'古文単語':w.subject})});}catch(e){db.settings={newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority'};}}
+function save(){db.version=2;try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){toast('保存できません。端末の空き容量を確認してください。')}}
+function uid(){return 'w'+now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;')}
+function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2400)}
+function subject(){return $('subject').value}
+function labelSub(s){return (db.subjects||[]).find(x=>x.id===s)?.name||(s==='en'?'英単語':s==='ko'?'古文単語':String(s||'単語帳'))}
+function renderSubjectOptions(){[['subject',false],['addSubject',false],['importSubject',false],['listSubject',true]].forEach(([id,all])=>{const el=$(id),old=el.value;el.innerHTML='';if(all){const o=document.createElement('option');o.value='all';o.textContent='すべて';el.appendChild(o)}db.subjects.filter(s=>!s.generatedSimilar||s.activeSimilar===true).forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;el.appendChild(o)});if([...el.options].some(o=>o.value===old))el.value=old;});}
+function dayKey(t=now()){const d=new Date(t);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function logsFor(id){return db.logs.filter(l=>l.id===id)}
+function mastery(w){
+ const ls=logsFor(w.id);const good=ls.filter(l=>l.correct);
+ const distinctDays=new Set(good.map(l=>dayKey(l.time))).size;
+ const recent=ls.slice(-5);const accuracy=recent.length?recent.filter(l=>l.correct).length/recent.length:0;
+ const quick=good.length?good.slice(-3).every(l=>l.seconds<=5):false;
+ return good.length>=4&&distinctDays>=3&&accuracy>=.8&&quick;
+}
+function intervalFor(w,correct,conf,secs){
+ const ls=logsFor(w.id), prev=ls.length?ls[ls.length-1]:null;
+ if(!correct)return 10*60*1000;
+ if(conf===1||secs>12)return 12*60*60*1000;
+ if(!prev)return 24*60*60*1000;
+ const gap=prev.time?Math.max(0,(now()-prev.time)/86400000):0;
+ const prior=Number(w.intervalDays||0);
+ let days=prior<=0?1:prior<=1?3:prior<=3?7:prior<=7?14:prior<=14?30:45;
+ if(conf===3&&secs<=5)days=Math.min(90,Math.ceil(days*1.4));
+ if(conf===2||secs>8)days=Math.max(1,Math.floor(days*.7));
+ if(prev&&!prev.correct)days=Math.max(1,Math.floor(days*.7));
+ return days*86400000;
+}
+function due(w){return !w.nextAt||w.nextAt<=now()}
+function priority(w){
+ const ls=logsFor(w.id), last=ls[ls.length-1];
+ if(!last)return 100;
+ let p=0;
+ if(due(w))p+=60;
+ if(!last.correct)p+=45;
+ if(last.confidence===1)p+=15;
+ if(last.seconds>8)p+=10;
+ if(now()-last.time>7*86400000)p+=Math.min(25,Math.floor((now()-last.time)/86400000));
+ if(mastery(w))p-=50;
+ return p;
+}
+function activeWords(s=subject()){
+ let arr=db.words.filter(w=>w.subject===s);
+ const a=Math.max(1,Number(sessionRange.start)||1), b=Number(sessionRange.end)||Infinity;
+ return arr.filter((w,i)=>i+1>=a&&i+1<=b);
+}
+function buildQueue(){
+ const all=activeWords();const dueWords=all.filter(due).sort((a,b)=>priority(b)-priority(a));
+ const fresh=all.filter(w=>!logsFor(w.id).length);
+ const configured=Number(db.settings.newLimit);
+ const limit=configured>0?configured:Infinity;
+ const reviewCount=dueWords.length;
+ // 0 means unlimited new words: no daily/session cap. A finite limit remains an optional user setting.
+ const dynamicNew=limit===Infinity?Infinity:(reviewCount>80?0:reviewCount>40?Math.min(5,limit):reviewCount>20?Math.min(10,limit):limit);
+ const chosenFresh=fresh.filter(w=>!dueWords.some(d=>d.id===w.id)).slice(0,dynamicNew);
+ const review=dueWords.filter(w=>!fresh.some(f=>f.id===w.id));
+ // Blend: 2 reviews then a new word, while maintaining review priority.
+ let out=[],ri=0,ni=0;
+ while(ri<review.length||ni<chosenFresh.length){
+   for(let j=0;j<2&&ri<review.length;j++)out.push(review[ri++]);
+   if(ni<chosenFresh.length)out.push(chosenFresh[ni++]);
+ }
+ // If nothing due and no fresh words, optionally offer lowest-priority words as practice.
+ if(!out.length&&all.length)out=all.slice().sort((a,b)=>priority(b)-priority(a));
+ // 出題形式（英→日／日→英／四択）とは独立して、順序だけをシャッフルする。
+ if($('studyOrder')?.value==='random'){
+  for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}
+ }
+ return out;
+}
+function renderStats(){
+ const s=subject(), all=db.words.filter(w=>w.subject===s);
+ $('todayCount').textContent=db.logs.filter(l=>dayKey(l.time)===dayKey()).length;
+ $('dueCount').textContent=all.filter(due).length;
+ $('totalCount').textContent=all.length;
+ $('statAnswers').textContent=db.logs.length;
+ $('statAccuracy').textContent=db.logs.length?Math.round(100*db.logs.filter(l=>l.correct).length/db.logs.length)+'%':'—';
+ $('statMastered').textContent=db.words.filter(mastery).length;
+}
+function renderAnalysis(){
+ const hiddenGenerated=new Set(db.subjects.filter(s=>s.generatedSimilar&&s.activeSimilar!==true).map(s=>s.id));
+ const words=db.words.filter(w=>!hiddenGenerated.has(w.subject));
+ const logs=db.logs.slice().sort((a,b)=>(b.time||0)-(a.time||0));
+ const wordById=new Map(db.words.map(w=>[w.id,w]));
+ const weak=$('weakList');weak.innerHTML='';
+ if(!words.length){weak.textContent='単語を登録すると、忘れやすい単語が表示されます。'}
+ else{
+  const ranked=words.map(w=>{
+   const ls=logsFor(w.id).slice(-5),wrong=ls.filter(l=>!l.correct).length,accuracy=ls.length?ls.filter(l=>l.correct).length/ls.length:0,last=ls[ls.length-1];
+   const overdue=w.nextAt&&w.nextAt<now()?Math.min(20,Math.floor((now()-w.nextAt)/86400000)+1):0;
+   const score=(ls.length?((1-accuracy)*60+wrong*8):25)+(last&&!last.correct?15:0)+overdue+(mastery(w)?-50:0);
+   return {w,ls,wrong,accuracy,last,score};
+  }).sort((a,b)=>b.score-a.score).slice(0,10);
+  ranked.forEach(({w,ls,wrong,accuracy,last})=>{
+   const item=document.createElement('div');item.className='listitem';
+   const title=document.createElement('strong');title.textContent=w.front;
+   const detail=document.createElement('div');detail.className='muted tiny';
+   detail.textContent=`${w.back} · 直近${ls.length}回の正答率 ${ls.length?Math.round(accuracy*100)+'%':'未回答'} · 間違い ${wrong}回${last&&!last.correct?' · 前回不正解':''}`;
+   item.append(title,detail);weak.appendChild(item);
+  });
+ }
+ const history=$('historySummary');history.innerHTML='';
+ let dayCount=0;
+ for(let offset=6;offset>=0;offset--){const date=new Date();date.setDate(date.getDate()-offset);const key=dayKey(date.getTime());const daily=db.logs.filter(l=>dayKey(l.time)===key);dayCount+=daily.length;const row=document.createElement('div');row.className='listitem';row.style.display='flex';row.style.justifyContent='space-between';row.style.gap='8px';const left=document.createElement('span');left.textContent=key;const right=document.createElement('span');right.className='muted tiny';right.textContent=daily.length?`${daily.length}回 · 正答率 ${Math.round(daily.filter(l=>l.correct).length/daily.length*100)}%`:'0回';row.append(left,right);history.appendChild(row)}
+ if(!dayCount){const note=document.createElement('p');note.className='muted tiny';note.textContent='直近7日間の回答履歴はありません。';history.appendChild(note)}
+ function renderLogList(parent,items,emptyText,limitNote=false){parent.innerHTML='';if(!items.length){parent.textContent=emptyText;return;}items.forEach(l=>{const w=wordById.get(l.id);const item=document.createElement('div');item.className='listitem';const title=document.createElement('strong');title.textContent=w?w.front:'削除済みの単語';const detail=document.createElement('div');detail.className='muted tiny';const when=l.time?new Date(l.time).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'日時不明';detail.textContent=`${when} · ${l.correct?'正解・思い出せた':'不正解・要復習'}${w?' · '+w.back:''} · ${Number(l.seconds||0).toFixed(1)}秒`;item.append(title,detail);parent.appendChild(item)});if(limitNote){const note=document.createElement('p');note.className='muted tiny';note.textContent=`${items.length}件を表示しています。`;parent.appendChild(note)}}
+ renderLogList($('recentList'),logs.slice(0,5),'まだ回答履歴がありません。');
+ $('allHistory').classList.toggle('hidden',!allHistoryVisible);$('showAllHistoryBtn').textContent=allHistoryVisible?'すべての回答履歴を閉じる':'過去の回答履歴をすべて表示';
+ if(allHistoryVisible)renderLogList($('allHistory'),logs,'まだ回答履歴がありません。');
+}
+
+function renderSimilar(){
+ if(!current){$('similarList').textContent='現在の単語帳に表示できる単語がありません。';return;}
+ const pool=db.words.filter(w=>w.subject===current.subject&&w.id!==current.id&&!String(w.subject).startsWith('sim_'));
+ const ranked=pool.map(w=>({w,match:similarScore(current,w)})).filter(x=>x.match.score>=.72).sort((a,b)=>b.match.score-a.match.score).slice(0,4);
+ $('similarList').innerHTML='';
+ if(!ranked.length){$('similarList').textContent='現時点で強い類似候補はありません。';return;}
+ ranked.forEach(({w,match})=>{const div=document.createElement('div');div.className='listitem';const strong=document.createElement('strong');strong.textContent=w.front;const detail=document.createElement('div');detail.className='muted tiny';detail.textContent=`${w.back} · ${match.reason}`;div.append(strong,detail);$('similarList').appendChild(div);});
+}
+
+function setPrompt(){
+ if(choiceTimer){clearTimeout(choiceTimer);choiceTimer=null;} if(swipeFallback){clearTimeout(swipeFallback);swipeFallback=null;} swipeTransitioning=false;const studyCard=$('studyCard');studyCard.classList.remove('study-card-swipe-left','study-card-swipe-right');void studyCard.offsetWidth;
+ revealed=false;faceBack=false;current=sessionQueue.find(w=>!w._sessionDone)||null;startedAt=now();confidence=2;lastChoice=null;comparePanelOpen=false;compareSelectedIds.clear();$('comparePanel').classList.add('hidden');
+ $('answerArea').classList.add('hidden');$('choiceArea').classList.add('hidden');$('showRow').classList.add('hidden');$('nextRow').classList.add('hidden');$('hintLine').textContent='';
+ $('elapsed').textContent='回答時間 0.0秒';
+ if(!current){$('prompt').textContent='この一周は終了';$('tapNote').textContent='何周でも続けられます';$('wordTag').textContent=labelSub(subject());$('emptyState').classList.toggle('hidden',db.words.some(w=>w.subject===subject()));$('showRow').classList.add('hidden');$('sessionLabel').textContent='一周完了 · 学習回数に上限なし';$('sessionProgress').style.width='100%';$('queueLabel').textContent='';$('nextRow').classList.remove('hidden');$('nextBtn').textContent='もう一周する';renderStats();renderSimilar();return}
+ $('emptyState').classList.add('hidden');
+ $('wordTag').textContent=labelSub(current.subject);
+ const mode=$('mode').value;
+ $('prompt').textContent=mode==='reverse'?current.back:current.front;$('tapNote').textContent=mode==='choice'?'選択肢を選ぶと解説が表示されます':'タップしてカードを裏返す';$('flipCard').classList.remove('flipped');$('swipeHint').textContent=mode==='choice'?'選択後、意味を確認してから自動で次へ進みます':'一度答えを見れば、表・裏どちらからでもスワイプで回答できます';
+ $('sessionLabel').textContent=`${sessionDone} / ${sessionQueue.length} 回答`;
+ $('sessionProgress').style.width=(sessionQueue.length?100*sessionDone/sessionQueue.length:0)+'%';
+ $('queueLabel').textContent=`残り ${sessionQueue.filter(w=>!w._sessionDone).length}`;
+ if(mode==='choice'){makeChoices();}$('showRow').classList.add('hidden');
+ renderStats();renderSimilar();
+}
+function makeChoices(){
+ const correct=current.back;
+ const pool=db.words.filter(w=>w.subject===current.subject&&w.id!==current.id).map(w=>w.back).filter(x=>x&&x!==correct);
+ const choices=[correct];
+ while(choices.length<4&&pool.length){const i=Math.floor(Math.random()*pool.length);const v=pool.splice(i,1)[0];if(!choices.includes(v))choices.push(v)}
+ while(choices.length<4)choices.push('（選択肢不足）');
+ choices.sort(()=>Math.random()-.5);
+ $('choiceArea').innerHTML='';
+ choices.forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{
+   if(!current||current._sessionDone||lastChoice!==null)return;
+   lastChoice=v===correct;
+   [...$('choiceArea').querySelectorAll('button')].forEach(btn=>btn.disabled=true);
+   reveal();
+   $('hintLine').textContent=lastChoice?'正解です。意味・補足を確認してください。':'不正解です。正しい意味と補足を確認してください。';
+   $('hintLine').className='tiny '+(lastChoice?'goodtext':'badtext');
+   $('answerText').textContent=current.back;
+   record(lastChoice,true);
+   // Replace the choices with a next button in exactly the same layout area.
+   $('choiceArea').innerHTML='';
+   const next=document.createElement('button');next.type='button';next.className='primary choice-next';next.textContent='次の単語へ';
+   next.onclick=()=>{if(choiceTimer){clearTimeout(choiceTimer);choiceTimer=null;}setPrompt();};
+   $('choiceArea').appendChild(next);
+   choiceTimer=setTimeout(()=>{if(current&&current._sessionDone)setPrompt();},7000);
+  };$('choiceArea').appendChild(b)});
+ $('choiceArea').classList.remove('hidden');
+}
+function reveal(){
+ if(!current)return;revealed=true;faceBack=true;
+ const answer=$('mode').value==='reverse'?current.front:current.back;
+ $('answerText').textContent=answer;
+ $('exampleText').textContent=[current.example||'',...Object.entries(current.extra||{}).filter(([k,v])=>k&&String(v??'').trim()).map(([k,v])=>`${k}：${v}`)].filter(Boolean).join('\n');
+ if($('mode').value!=='choice'){$('prompt').textContent=answer;$('tapNote').textContent=current.example||'意味';}
+ const ls=logsFor(current.id);const last=ls[ls.length-1];
+ $('historyText').textContent=last?`過去 ${ls.length} 回回答 · 前回 ${last.correct?'正解':'不正解'} · 次回 ${current.nextAt?new Date(current.nextAt).toLocaleDateString('ja-JP'):'未設定'}`:'初めての出題';
+ $('answerArea').classList.remove('hidden');$('showRow').classList.add('hidden');if($('mode').value!=='choice')$('choiceArea').classList.add('hidden');$('nextRow').classList.add('hidden');$('flipCard').classList.add('flipped');$('swipeHint').textContent='右へスワイプ：思い出せた　／　左へスワイプ：まだ覚えていない';
+ $('elapsed').textContent=`回答時間 ${((now()-startedAt)/1000).toFixed(1)}秒`;
+}
+function record(correct,keepChoiceReview=false,options={}){
+ if(!current||!revealed||current._sessionDone)return;
+ const secs=Math.max(.1,(now()-startedAt)/1000);
+ confidence=!correct?1:(secs<=4?3:secs<=10?2:1);
+ const log={id:current.id,time:now(),correct,confidence,seconds:Number(secs.toFixed(1)),mode:$('mode').value,choice:lastChoice};
+ db.logs.push(log);
+ const target=db.words.find(w=>w.id===current.id)||current;
+ const gap=intervalFor(target,correct,confidence,secs);
+ target.lastAt=now();target.intervalDays=correct?Math.max(.01,gap/86400000):0;
+ target.nextAt=now()+gap;
+ target.streak=correct?(target.streak||0)+1:0;
+ current._sessionDone=true;sessionDone++;save();
+ if(!keepChoiceReview&&!options.deferCleanup){$('hintLine').textContent=correct?`記録しました。次回復習：${formatInterval(gap)}`:`記録しました。約10分後にもう一度出題します。`;$('answerArea').classList.add('hidden');$('nextRow').classList.add('hidden');}
+ else if(keepChoiceReview){$('answerArea').classList.remove('hidden');$('choiceArea').classList.remove('hidden');$('nextRow').classList.add('hidden');}
+ renderStats();renderWords();renderAnalysis();
+}
+function formatInterval(ms){if(ms<3600000)return Math.round(ms/60000)+'分後';if(ms<86400000)return Math.round(ms/3600000)+'時間後';return Math.round(ms/86400000)+'日後'}
+function startSession(){sessionQueue=buildQueue().map(w=>({...w,_sessionDone:false}));sessionDone=0;setPrompt()}
+function renderWords(){
+ const s=$('listSubject').value,q=$('searchWords').value.trim().toLowerCase();
+ const hiddenGenerated=new Set(db.subjects.filter(x=>x.generatedSimilar&&x.activeSimilar!==true).map(x=>x.id));const words=db.words.filter(w=>!hiddenGenerated.has(w.subject)&&(s==='all'||w.subject===s)&&(!q||(w.front+' '+w.back+' '+(w.example||'')+' '+Object.entries(w.extra||{}).map(([k,v])=>k+' '+v).join(' ')).toLowerCase().includes(q)));
+ $('wordList').innerHTML='';
+ if(!words.length){$('wordList').innerHTML='<p class="muted">該当する単語がありません。</p>';updateSelectionUI();return}
+ words.slice(0,200).forEach(w=>{
+  const d=document.createElement('div');d.className='listitem';
+  const state=mastery(w)?'<span class="pill master">習得判定</span>':due(w)?'<span class="pill due">復習待ち</span>':'<span class="pill">復習予定あり</span>';
+  const checked=selectedWordIds.has(w.id)?'checked':'';
+  d.innerHTML=`<div class="between"><label style="display:flex;align-items:center;gap:8px;min-width:0"><input class="wordcheck" data-id="${esc(w.id)}" type="checkbox" style="width:auto" ${checked}><strong style="overflow-wrap:anywhere">${esc(w.front)}</strong></label>${state}</div><div>${esc(w.back)}</div><div class="muted tiny">${esc(w.example||'')} ${Object.entries(w.extra||{}).map(([k,v])=>`· ${esc(k)}：${esc(v)}`).join(' ')} · ${labelSub(w.subject)} · 回答 ${logsFor(w.id).length}回</div>`;
+  const del=document.createElement('button');del.className='small danger';del.textContent='この単語を削除';del.style.marginTop='8px';del.onclick=()=>deleteWords([w.id]);
+  d.appendChild(del);$('wordList').appendChild(d);
+ });
+ if(words.length>200){const p=document.createElement('p');p.className='muted tiny';p.textContent=`先頭200語を表示中（該当 ${words.length} 語）`;$('wordList').appendChild(p)}
+ document.querySelectorAll('.wordcheck').forEach(cb=>cb.onchange=()=>{if(cb.checked)selectedWordIds.add(cb.dataset.id);else selectedWordIds.delete(cb.dataset.id);updateSelectionUI()});updateSelectionUI();
+}
+function updateSelectionUI(){const shown=[...document.querySelectorAll('.wordcheck')];$('selectedCount').textContent=`${selectedWordIds.size}語選択中`;$('selectAllWords').checked=shown.length>0&&shown.every(c=>c.checked)}
+function deleteWords(ids){const unique=[...new Set(ids)].filter(id=>db.words.some(w=>w.id===id));if(!unique.length){toast('削除する単語を選択してください。');return}if(!confirm(`${unique.length}語を削除しますか？該当する回答履歴も削除されます。この操作は取り消せません。`))return;db.words=db.words.filter(w=>!unique.includes(w.id));db.logs=db.logs.filter(l=>!unique.includes(l.id));unique.forEach(id=>selectedWordIds.delete(id));save();renderSubjectOptions();renderWords();renderStats();renderAnalysis();startSession();toast(`${unique.length}語を削除しました。`)}
+function editDistance(a,b){const dp=Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i===0?j:j===0?i:0));for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return dp[a.length][b.length]}
+function similarScore(a,b){
+ const af=String(a.front||'').toLowerCase().replace(/[^a-z0-9ぁ-んァ-ヶ一-龠]/g,''),bf=String(b.front||'').toLowerCase().replace(/[^a-z0-9ぁ-んァ-ヶ一-龠]/g,'');
+ let score=0,reason='';
+ if(af&&bf){const ratio=1-editDistance(af,bf)/Math.max(af.length,bf.length);if(ratio>=.72&&Math.min(af.length,bf.length)>=4){score=ratio;reason='綴りがかなり近い'}}
+ const am=String(a.back||'').toLowerCase(),bm=String(b.back||'').toLowerCase();
+ const stop=new Set(['する','ある','いる','こと','もの','ため','よう','なる','れる','られる','的','的な','など','その','この','それ','これ','意味','人','物','状態','行う','できる','でき','the','to','of','and','a','an','in','on','for']);
+ const at=am.split(/[、，,・／/;；\s]+/).map(x=>x.trim()).filter(x=>x.length>=2&&!stop.has(x));
+ const bt=bm.split(/[、，,・／/;；\s]+/).map(x=>x.trim()).filter(x=>x.length>=2&&!stop.has(x));
+ if(am.trim()===bm.trim()&&am.trim())return {score:1,reason:'意味の説明が同じ'};
+ if(at.some(x=>bt.includes(x))){score=Math.max(score,.9);reason='意味の説明に共通する語がある'}
+ return {score,reason};
+}
+function detectAffixes(word){
+ const w=String(word.front||'').toLowerCase().trim().replace(/[^a-z]/g,'');if(!w||w.length<5)return [];
+ // Common English affixes; every valid-looking match is kept so e.g. un- and -able can both be found.
+ const prefixes=['counter','under','inter','trans','super','multi','micro','macro','contra','circum','through','within','without','anti','auto','semi','sub','mis','non','pre','pro','dis','de','ex','re','un','en','em','fore','post','out','over','up','co','intra','extra','hyper','hypo','ultra','uni','bi','tri','im','il','ir','mid','mono','para','peri','tele','retro','con','com','cor','ob','op','per','ad','ac','af','ag','al','an','ap','as','at','meta','mega','neo','poly','pseudo','quasi','self','vice','eco','mal','bene','eu','syn','sym','by'].sort((a,b)=>b.length-a.length);
+ const suffixes=['ational','fulness','ousness','ability','ibility','ization','isation','ologist','ological','ography','preneur','ations','ation','ition','sion','tion','ment','ness','ity','able','ible','ously','fully','less','ful','ive','ize','ise','ify','ship','hood','ward','wise','ology','ist','ism','ence','ance','ency','ancy','ious','ial','ical','ary','ory','er','or','en','ly','y','ate','ure','dom','some','ant','ent','acy','age','ee','eer','ess','ette','ian','ing','let','ling','oid','ty','ish','esque','ward','wise'].sort((a,b)=>b.length-a.length);
+ const out=[];const seen=new Set();
+ for(const p of prefixes){if(w.startsWith(p)&&w.length-p.length>=3){const id='p:'+p;if(!seen.has(id)){out.push({type:'接頭語',key:p,label:`${p}-`,stem:w.slice(p.length)});seen.add(id)}}}
+ for(const suf of suffixes){if(w.endsWith(suf)&&w.length-suf.length>=3){const id='s:'+suf;if(!seen.has(id)){out.push({type:'接尾語',key:suf,label:`-${suf}`,stem:w.slice(0,-suf.length)});seen.add(id)}}}
+ return out;
+}
+function stableHash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
+function sourceWordsForSimilarity(){const generatedIds=new Set(db.subjects.filter(s=>s.generatedSimilar).map(s=>s.id));return db.words.filter(w=>!generatedIds.has(w.subject)&&!String(w.subject).startsWith('sim_'))}
+const meaningConcepts=[
+ ['思う・考える',['think','consider','suppose','believe','思う','考える','思考','検討','考慮']],
+ ['主張する・論じる',['claim','argue','insist','assert','advocate','contend','maintain','allege','主張','論じる','言い張る','断言']],
+ ['言及する・述べる',['mention','remark','refer','note','state','述べる','言及','触れる','指摘']],
+ ['話す・伝える',['say','tell','speak','report','言う','話す','伝える','告げる']],
+ ['表現する・描写する',['express','describe','illustrate','表現','表す','描写']],
+ ['苦情・不満を述べる',['complain','protest','grumble','苦情','不平','不満'] ],
+ ['見る・観察する',['see','look','view','observe','watch','見る','眺める','観察','見つめる']],
+ ['開始',['begin','start','commence','始める','開始','始まる']],
+ ['終了',['finish','end','complete','conclude','終わる','終える','終了','完了']],
+ ['助ける',['help','assist','aid','support','助ける','手伝う','援助','支援','救う']],
+ ['必要',['need','require','necessary','essential','必要','必須','要る','欠かせない']],
+ ['大切・重要',['important','significant','valuable','大切','重要','重大','価値']],
+ ['喜び・幸福',['happy','glad','joy','pleased','delighted','うれしい','嬉しい','喜ぶ','幸福','幸せ']],
+ ['悲しみ',['sad','unhappy','sorrow','grief','悲しい','悲しむ','哀れ','悲哀']],
+ ['変化',['alter','change','modify','transform','変える','変化','変更','変わる']],
+ ['取得・獲得',['get','obtain','gain','acquire','得る','手に入れる','獲得','取得']],
+ ['拒否',['refuse','reject','decline','断る','拒む','拒絶','拒否']],
+ ['放棄・捨てる',['abandon','discard','desert','throw away','捨てる','放棄','見捨てる']],
+ ['増加',['increase','grow','rise','expand','増える','増加','増やす']],
+ ['減少',['decrease','reduce','decline','shrink','減る','減少','減らす']],
+ ['速さ',['quick','fast','rapid','swift','速い','迅速','早い']],
+ ['作る',['create','make','produce','generate','作る','作成','生む','生成']]
+];
+function meaningTokens(s){return String(s||'').toLowerCase().split(/[、，,・／/;；|\n\r]+/).map(x=>x.trim().replace(/^[\s:：()（）]+|[\s:：()（）]+$/g,'')).filter(x=>x.length>=2&&!['こと','もの','ため','よう','なる','など','意味','状態','すること','できる','the','a','an','to','of','in','on','for','with','and'].includes(x));}
+function buildSimilarCandidates(){
+ const words=sourceWordsForSimilarity(), result=[], seen=new Set();
+ const seenMembership=new Set();
+ function add(type,key,subject,items,displayKey=key){const uniq=[...new Map(items.map(w=>[w.id,w])).values()];if(uniq.length<2)return;const fingerprint=`${type}|${subject}|${key}`;const membership=`${type}|${subject}|${uniq.map(w=>w.id).sort().join(',')}`;if(seen.has(fingerprint)||seenMembership.has(membership))return;seen.add(fingerprint);seenMembership.add(membership);result.push({fingerprint,type,key:String(key),displayKey:String(displayKey),subject,subjectName:labelSub(subject),words:uniq});}
+ // Prefix/suffix groups are consolidated by the actual affix, not by each word pair.
+ const morph=new Map();
+ for(const w of words){for(const a of detectAffixes(w)){const k=`${a.type}|${w.subject}|${a.key}`;if(!morph.has(k))morph.set(k,{type:a.type,key:a.key,subject:w.subject,words:[]});morph.get(k).words.push(w)}}
+ for(const g of morph.values())add(g.type,g.key,g.subject,g.words,g.type==='接頭語'?g.key+'-':'-'+g.key);
+ // Group by exact meaningful translation fragments and a compact built-in synonym/concept list.
+ for(const subject of [...new Set(words.map(w=>w.subject))]){
+  const subWords=words.filter(w=>w.subject===subject);
+  const tokenMap=new Map();
+  for(const w of subWords){
+   const tokens=new Set(meaningTokens(w.back));
+   for(const t of tokens){if(!tokenMap.has(t))tokenMap.set(t,[]);tokenMap.get(t).push(w)}
+   const norm=String(w.back||'').toLowerCase().replace(/[\s、，,・／/;；|]/g,'');
+   if(norm.length>=2){if(!tokenMap.has('同じ意味:'+norm))tokenMap.set('同じ意味:'+norm,[]);tokenMap.get('同じ意味:'+norm).push(w)}
+   for(const [concept,terms] of meaningConcepts){const str=String(w.back||'').toLowerCase();if(terms.some(term=>{const t=term.toLowerCase();return /[a-z]/.test(t)?new RegExp('(^|[^a-z])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z]|$)','i').test(str):str.includes(t)})){const ck='概念:'+concept;if(!tokenMap.has(ck))tokenMap.set(ck,[]);tokenMap.get(ck).push(w)}}
+  }
+  for(const [token,items] of tokenMap){if(items.length<2)continue;const cleaned=token.startsWith('同じ意味:')?token.slice(6):token.startsWith('概念:')?token.slice(4):token;add('意味が近い語',token,subject,items,cleaned)}
+ }
+ // Shared stems: group words that remain identical after stripping a plausible suffix/prefix.
+ const stemGroups=new Map();
+ for(const w of words){const raw=String(w.front||'').toLowerCase().replace(/[^a-z]/g,'');if(raw.length<5)continue;
+  const forms=new Set([raw]);
+  for(const a of detectAffixes(w)){if(a.stem&&a.stem.length>=3)forms.add(a.stem)}
+  for(const form of forms){const k=`${w.subject}|${form}`;if(!stemGroups.has(k))stemGroups.set(k,{subject:w.subject,stem:form,words:[]});stemGroups.get(k).words.push(w)}
+ }
+ for(const g of stemGroups.values()){const uniq=[...new Map(g.words.map(w=>[w.id,w])).values()];if(uniq.length>=2){const labels=uniq.map(w=>String(w.front));add('共通語根',g.stem,g.subject,uniq,`${g.stem}（${labels.slice(0,4).join('・')}${labels.length>4?'…':''}）`)}}
+ // Spelling groups: connected clusters with a stricter edit-distance threshold, to avoid one book per pair.
+ for(const subject of [...new Set(words.map(w=>w.subject))]){
+  const en=words.filter(w=>w.subject===subject).map(w=>({w,x:String(w.front||'').toLowerCase().replace(/[^a-z]/g,'')})).filter(z=>z.x.length>=4);
+  const parent=en.map((_,i)=>i);const find=i=>parent[i]===i?i:(parent[i]=find(parent[i]));const join=(a,b)=>{a=find(a);b=find(b);if(a!==b)parent[b]=a};
+  for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i].x,b=en[j].x,ratio=1-editDistance(a,b)/Math.max(a.length,b.length),lenRatio=Math.min(a.length,b.length)/Math.max(a.length,b.length);if(lenRatio>=.78&&ratio>=.76)join(i,j)}
+  const components=new Map();for(let i=0;i<en.length;i++){const r=find(i);if(!components.has(r))components.set(r,[]);components.get(r).push(en[i].w)}
+  for(const items of components.values()){if(items.length>=2){const label=items.map(w=>w.front).sort((a,b)=>String(a).localeCompare(String(b))).join(' / ');add('綴りが似た語',label,subject,items,label)}}
+ }
+ result.sort((a,b)=>['接頭語','接尾語','共通語根','意味が近い語','綴りが似た語'].indexOf(a.type)-['接頭語','接尾語','共通語根','意味が近い語','綴りが似た語'].indexOf(b.type)||a.subjectName.localeCompare(b.subjectName,'ja')||a.displayKey.localeCompare(b.displayKey,'ja'));
+ return result;
+}
+function renderSimilarCandidates(){
+ const query=$('similarSearch').value.trim().toLowerCase(),type=$('similarTypeFilter').value;
+ $('selectedSimilarCount').textContent=`${selectedSimilarIds.size}候補選択中`;
+ const filtered=similarCandidates.filter(g=>(type==='all'||g.type===type)&&(!query||`${g.type} ${g.key} ${g.displayKey} ${g.subjectName} ${g.words.map(w=>w.front+' '+w.back).join(' ')}`.toLowerCase().includes(query)));
+ const box=$('similarGroupList');box.innerHTML='';
+ if(!similarCandidates.length){$('similarDeckStatus').textContent=similarSearchDone?'候補が見つかりませんでした。単語を登録するか、別の単語帳に切り替えてください。':'まだ候補を探していません。「候補を探す」を押してください。';return}
+ $('similarDeckStatus').textContent=`候補 ${filtered.length} 件を表示中（全${similarCandidates.length}件）。チェックした候補だけ単語帳にできます。`;
+ filtered.slice(0,250).forEach(g=>{
+  const card=document.createElement('div');card.className='similar-candidate';
+  const top=document.createElement('div');top.className='similar-candidate-top';
+  const cb=document.createElement('input');cb.type='checkbox';cb.checked=selectedSimilarIds.has(g.fingerprint);cb.dataset.fingerprint=g.fingerprint;cb.setAttribute('aria-label',`${g.type} ${g.displayKey}を選択`);cb.onchange=()=>{if(cb.checked)selectedSimilarIds.add(g.fingerprint);else selectedSimilarIds.delete(g.fingerprint);$('selectedSimilarCount').textContent=`${selectedSimilarIds.size}候補選択中`;};
+  const body=document.createElement('div');body.style.minWidth='0';body.style.flex='1';
+  const title=document.createElement('strong');title.textContent=`${g.type}：${g.displayKey}`;
+  const meta=document.createElement('div');meta.className='muted tiny';meta.textContent=`${g.subjectName} · ${g.words.length}語`;
+  body.append(title,meta);top.append(cb,body);card.appendChild(top);
+  const detail=document.createElement('div');detail.className='similar-candidate-detail';detail.textContent=g.words.slice(0,7).map(w=>`${w.front} — ${w.back}`).join(' ／ ')+(g.words.length>7?' ／ …':'');card.appendChild(detail);
+  box.appendChild(card);
+ });
+ if(filtered.length>250){const note=document.createElement('p');note.className='muted tiny';note.textContent='先頭250候補を表示しています。検索でさらに絞り込めます。';box.appendChild(note)}
+ if(!filtered.length){const note=document.createElement('p');note.className='muted tiny';note.textContent='条件に合う候補はありません。検索語や種類を変更してください。';box.appendChild(note)}
+}
+function createSelectedSimilarDecks(){
+ const chosen=similarCandidates.filter(g=>selectedSimilarIds.has(g.fingerprint));
+ if(!chosen.length){toast('先に候補にチェックを付けてください。');return}
+ const name=$('similarCombinedName').value.trim()||chosen.map(g=>g.displayKey).slice(0,3).join('・')+(chosen.length>3?' ほか':'');
+ if(db.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase()&&!s.combinedSimilar)){toast('同じ名前の単語帳があります。別の名前にしてください。');return}
+ const existing=db.subjects.find(s=>s.combinedSimilar&&s.name===name);
+ let subj=existing;
+ if(!subj){const id='simset_'+stableHash(name+'|'+now());subj={id,name,generatedSimilar:true,activeSimilar:true,combinedSimilar:true,sourceGroups:[]};db.subjects.push(subj)}
+ subj.name=name;subj.generatedSimilar=true;subj.activeSimilar=true;subj.combinedSimilar=true;
+ const sourceMap=new Map();chosen.forEach(g=>g.words.forEach(w=>{if(!sourceMap.has(w.id))sourceMap.set(w.id,w)}));
+ const oldClones=db.words.filter(w=>w.subject===subj.id),bySource=new Map(oldClones.map(w=>[w.sourceWordId,w])),wanted=new Set();let added=0;
+ for(const source of sourceMap.values()){
+  wanted.add(source.id);let clone=bySource.get(source.id);
+  if(clone){const keep={id:clone.id,subject:subj.id,sourceWordId:source.id,createdAt:clone.createdAt,nextAt:clone.nextAt,intervalDays:clone.intervalDays,streak:clone.streak,lastAt:clone.lastAt};Object.assign(clone,source,keep,{front:source.front,back:source.back,example:source.example,extra:{...(source.extra||{})}})}
+  else{clone={...source,id:uid(),subject:subj.id,sourceWordId:source.id,createdAt:now(),nextAt:0,intervalDays:0,streak:0,extra:{...(source.extra||{})}};db.words.push(clone);added++}
+ }
+ const obsolete=oldClones.filter(w=>!wanted.has(w.sourceWordId)).map(w=>w.id);if(obsolete.length){db.words=db.words.filter(w=>!obsolete.includes(w.id));db.logs=db.logs.filter(l=>!obsolete.includes(l.id))}
+ subj.sourceGroups=chosen.map(g=>({type:g.type,key:g.displayKey}));save();renderSubjectOptions();renderWords();renderStats();renderAnalysis();renderDeckManagerList();
+ selectedSimilarIds.clear();renderSimilarCandidates();$('similarCombinedName').value='';
+ $('similarDeckStatus').textContent=`「${name}」を作成しました。${sourceMap.size}語（重複を除外）。単語帳管理で名前変更・削除できます。`;
+ toast(`「${name}」を${sourceMap.size}語で作成しました。`);
+}
+$('buildSimilarDecksBtn').onclick=()=>{similarSearchDone=true;similarCandidates=buildSimilarCandidates();selectedSimilarIds.clear();renderSimilarCandidates();};
+$('similarSearch').oninput=renderSimilarCandidates;$('similarTypeFilter').onchange=renderSimilarCandidates;
+$('selectVisibleSimilarBtn').onclick=()=>{const query=$('similarSearch').value.trim().toLowerCase(),type=$('similarTypeFilter').value;const filtered=similarCandidates.filter(g=>(type==='all'||g.type===type)&&(!query||`${g.type} ${g.key} ${g.displayKey} ${g.subjectName} ${g.words.map(w=>w.front+' '+w.back).join(' ')}`.toLowerCase().includes(query))).slice(0,250);filtered.forEach(g=>selectedSimilarIds.add(g.fingerprint));renderSimilarCandidates();};
+$('createSelectedSimilarDecksBtn').onclick=createSelectedSimilarDecks;
+
+function sameAffix(a,b){return detectAffixes(a).some(x=>detectAffixes(b).some(y=>x.type===y.type&&x.key===y.key));}
+function comparePool(){return db.words.filter(w=>w.subject===subject());}
+function compareRankedWords(){
+ if(!current)return [];
+ return comparePool().filter(w=>w.id!==current.id).map(w=>{const sm=similarScore(current,w),affix=sameAffix(current,w);return {w,score:Math.max(sm.score,affix ? 0.58 : 0),reason:affix?'共通する接頭語・接尾語の候補':sm.reason};}).filter(x=>x.score>=.30).sort((a,b)=>b.score-a.score);
+}
+function openCompareMode(){
+ if(!current){toast('先に単語を登録してください。');return;}
+ comparePanelOpen=true;$('comparePanel').classList.remove('hidden');compareSelectedIds.clear();compareSelectedIds.add(current.id);
+ compareRankedWords().slice(0,3).forEach(x=>compareSelectedIds.add(x.w.id));
+ $('compareWordSearch').value='';renderCompareCandidates();renderCompareResults();
+}
+function renderCompareCandidates(){
+ const box=$('compareCandidateList');if(!box)return;box.innerHTML='';
+ const q=$('compareWordSearch').value.trim().toLowerCase(),ranked=compareRankedWords();
+ let list;
+ if(q){list=comparePool().filter(w=>w.id!==current?.id&&`${w.front} ${w.back} ${w.example||''} ${Object.entries(w.extra||{}).map(([k,v])=>k+' '+v).join(' ')}`.toLowerCase().includes(q)).map(w=>{const sm=current?similarScore(current,w):{score:0,reason:''};return {w,score:sm.score,reason:sm.reason}}).sort((a,b)=>b.score-a.score);}
+ else list=ranked;
+ if(!current){box.textContent='単語を登録してください。';return;}
+ if(!list.length){const p=document.createElement('p');p.className='muted tiny';p.textContent=q?'検索に一致する単語がありません。':'自動候補がありません。検索欄から比較したい単語を探せます。';box.appendChild(p);}
+ list.slice(0,80).forEach(({w,reason})=>{
+  const row=document.createElement('label');row.className='similar-candidate';row.style.display='flex';row.style.gap='9px';row.style.alignItems='flex-start';
+  const cb=document.createElement('input');cb.type='checkbox';cb.checked=compareSelectedIds.has(w.id);cb.style.width='auto';cb.style.marginTop='5px';
+  cb.onchange=()=>{if(cb.checked)compareSelectedIds.add(w.id);else compareSelectedIds.delete(w.id);renderCompareResults();$('compareSelectedCount').textContent=`${compareSelectedIds.size}語選択中`;};
+  const info=document.createElement('div');info.style.minWidth='0';const strong=document.createElement('strong');strong.textContent=w.front;const detail=document.createElement('div');detail.className='muted tiny';detail.textContent=`${w.back}${reason?' · '+reason:''}`;info.append(strong,detail);row.append(cb,info);box.appendChild(row);
+ });
+ if(list.length>80){const p=document.createElement('p');p.className='muted tiny';p.textContent='先頭80語を表示中です。検索で絞り込めます。';box.appendChild(p)}
+ $('compareSelectedCount').textContent=`${compareSelectedIds.size}語選択中`;
+}
+function renderCompareResults(){
+ const box=$('compareResults');if(!box)return;box.innerHTML='';
+ const chosen=comparePool().filter(w=>compareSelectedIds.has(w.id));
+ if(chosen.length<2){const p=document.createElement('p');p.className='muted tiny';p.textContent='違いを見比べるため、2語以上を選択してください。';box.appendChild(p);$('compareSelectedCount').textContent=`${chosen.length}語選択中`;return;}
+ chosen.forEach(w=>{
+  const card=document.createElement('div');card.className='compare-word';
+  const title=document.createElement('strong');title.textContent=w.front;const meaning=document.createElement('div');meaning.className='meaning';meaning.textContent=w.back;
+  card.append(title,meaning);
+  if(w.example){const ex=document.createElement('div');ex.className='muted tiny';ex.textContent='例文：'+w.example;card.appendChild(ex)}
+  const extras=Object.entries(w.extra||{}).filter(([k,v])=>k&&String(v??'').trim());
+  extras.forEach(([k,v])=>{const d=document.createElement('div');d.className='tiny';d.textContent=`${k}：${v}`;card.appendChild(d)});
+  if(current&&w.id!==current.id){const sm=similarScore(current,w),morph=sameAffix(current,w);const hint=document.createElement('div');hint.className='muted tiny';hint.style.marginTop='7px';hint.textContent=morph?'構造：共通する接頭語・接尾語の候補':sm.reason;card.appendChild(hint)}
+  box.appendChild(card);
+ });
+ $('compareSelectedCount').textContent=`${chosen.length}語選択中`;
+}
+$('openCompareBtn').onclick=openCompareMode;
+$('compareWordSearch').oninput=renderCompareCandidates;
+$('suggestCompareBtn').onclick=()=>{if(!current)return;compareSelectedIds.clear();compareSelectedIds.add(current.id);compareRankedWords().slice(0,5).forEach(x=>compareSelectedIds.add(x.w.id));renderCompareCandidates();renderCompareResults();};
+$('clearCompareBtn').onclick=()=>{compareSelectedIds.clear();renderCompareCandidates();renderCompareResults();};
+function renderWordMapSearch(){
+ const box=$('wordMapSearchResults');if(!box)return;const q=$('wordMapSearch').value.trim().toLowerCase();box.innerHTML='';
+ if(!q){box.textContent='単語名や意味を入力すると、登録語から候補を表示します。';return;}
+ const words=sourceWordsForSimilarity().filter(w=>`${w.front} ${w.back}`.toLowerCase().includes(q)).sort((a,b)=>{const aa=String(a.front).toLowerCase().startsWith(q)?0:1,bb=String(b.front).toLowerCase().startsWith(q)?0:1;return aa-bb||String(a.front).localeCompare(String(b.front),'en')}).slice(0,25);
+ if(!words.length){box.textContent='候補がありません。登録語の綴りや意味を確認してください。';return;}
+ words.forEach(w=>{const btn=document.createElement('button');btn.type='button';btn.className='soft map-resultbtn';btn.style.width='100%';btn.style.marginBottom='5px';btn.textContent=`${w.front} — ${w.back}`;const sub=document.createElement('small');sub.textContent=labelSub(w.subject);btn.appendChild(sub);btn.onclick=()=>{wordMapSelectedId=w.id;renderWordMap(w);};box.appendChild(btn);});
+}
+function renderWordMap(w){
+ const box=$('wordMapResult');if(!box)return;box.innerHTML='';if(!w){box.textContent='単語を検索して、候補を選択してください。';return;}
+ const title=document.createElement('div');title.className='map-node';const strong=document.createElement('strong');strong.textContent=`${w.front} — ${w.back}`;title.appendChild(strong);const sub=document.createElement('div');sub.className='muted tiny';sub.textContent=labelSub(w.subject)+' · 登録語からの推定マップ';title.appendChild(sub);box.appendChild(title);
+ const subjectWords=sourceWordsForSimilarity().filter(x=>x.subject===w.subject&&x.id!==w.id);
+ const aff=detectAffixes(w),branchDefs=[];
+ aff.forEach(a=>{
+  const related=subjectWords.filter(x=>detectAffixes(x).some(y=>y.type===a.type&&y.key===a.key));
+  if(related.length){branchDefs.push({title:`${a.type}：${a.label}（推定）`,detail:`推定語幹：${a.stem}`,words:related.slice(0,14)});}
+  const stemRelated=subjectWords.filter(x=>String(x.front||'').toLowerCase().replace(/[^a-z]/g,'')===a.stem||detectAffixes(x).some(y=>y.stem===a.stem));
+  if(stemRelated.length){branchDefs.push({title:`共通語幹の候補：${a.stem}`,detail:'語形から機械的に抽出した候補',words:stemRelated.slice(0,14)});}
+ });
+ const semantic=subjectWords.map(x=>({w:x,m:similarScore(w,x)})).filter(x=>x.m.score>=.62).sort((a,b)=>b.m.score-a.m.score).slice(0,8);
+ if(semantic.length)branchDefs.push({title:'意味・綴りが近い候補',detail:'登録訳と綴りから推定',words:semantic.map(x=>x.w)});
+ const unique=new Set();const clean=branchDefs.filter(g=>{const k=g.title+'|'+g.words.map(x=>x.id).join(',');if(unique.has(k))return false;unique.add(k);return true});
+ if(!clean.length){const note=document.createElement('p');note.className='muted tiny';note.textContent='この単語からは、共通する接頭語・接尾語・語幹の候補を十分に検出できませんでした。別の単語も検索してください。';box.appendChild(note);return;}
+ clean.forEach(g=>{const branch=document.createElement('div');branch.className='map-branch';const head=document.createElement('strong');head.textContent=g.title;branch.appendChild(head);const detail=document.createElement('div');detail.className='muted tiny';detail.textContent=g.detail;branch.appendChild(detail);const chips=document.createElement('div');chips.className='map-chips';g.words.forEach(x=>{const chip=document.createElement('button');chip.type='button';chip.className='map-chip';chip.textContent=`${x.front} — ${x.back}`;chip.onclick=()=>{wordMapSelectedId=x.id;$('wordMapSearch').value=x.front;renderWordMap(x);};chips.appendChild(chip)});branch.appendChild(chips);box.appendChild(branch)});
+}
+$('wordMapSearch').oninput=renderWordMapSearch;
+function updateModeLabels(){
+ const s=subject(), sample=db.words.find(w=>w.subject===s), frontToBack=$('mode').querySelector('option[value="recall"]'),backToFront=$('mode').querySelector('option[value="reverse"]'),choice=$('mode').querySelector('option[value="choice"]');
+ if(s==='en'||(s!=='ko'&&sample&&/^[a-z]/i.test(String(sample.front||'')))){frontToBack.textContent='英語→日本語';backToFront.textContent='日本語→英語';choice.textContent='四択（英語→日本語）';}
+ else if(s==='ko'){frontToBack.textContent='古文→現代語訳';backToFront.textContent='現代語訳→古文';choice.textContent='四択（古文→現代語訳）';}
+ else{frontToBack.textContent=`${labelSub(s)}：単語→意味`;backToFront.textContent=`${labelSub(s)}：意味→単語`;choice.textContent='四択（単語→意味）';}
+}
+$('subject').onchange=()=>{updateModeLabels();startSession();};
+$('mode').onchange=()=>setPrompt();
+$('studyOrder').onchange=()=>{db.settings.studyOrder=$('studyOrder').value;save();startSession();toast($('studyOrder').value==='random'?'出題順をランダムにしました。':'復習優先順にしました。')};
+function toggleCardFace(){
+ if(!current||$('mode').value==='choice'||current._sessionDone||swipeTransitioning)return;
+ if(!revealed){reveal();return;}
+ faceBack=!faceBack;
+ if(faceBack){
+  $('prompt').textContent=$('mode').value==='reverse'?current.front:current.back;
+  $('answerArea').classList.remove('hidden');$('flipCard').classList.add('flipped');
+  $('tapNote').textContent='答えを表示中。タップで表へ戻れます';
+ }else{
+  $('answerArea').classList.add('hidden');$('flipCard').classList.remove('flipped');
+  $('prompt').textContent=$('mode').value==='reverse'?current.back:current.front;
+  $('tapNote').textContent='表面です。スワイプで回答できます';
+ }
+ $('swipeHint').textContent='右へスワイプ：思い出せた ／ 左へスワイプ：まだ覚えていない';
+}
+$('flipCard').onclick=e=>{if(e.target.closest('button'))return;toggleCardFace();};
+$('flipCard').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&current&&$('mode').value!=='choice'){e.preventDefault();toggleCardFace();}};
+let swipeStart=null;
+const flip=$('studyCard');
+function finishSwipeAnimation(){
+ if(!swipeTransitioning)return;
+ if(swipeFallback){clearTimeout(swipeFallback);swipeFallback=null;}
+ swipeTransitioning=false;flip.classList.remove('study-card-swipe-left','study-card-swipe-right');
+ setPrompt();
+}
+flip.addEventListener('animationend',e=>{if(e.target===flip&&(e.animationName==='swipeOutLeft'||e.animationName==='swipeOutRight'))finishSwipeAnimation();});
+flip.addEventListener('pointerdown',e=>{if(e.target.closest('button,input,select,label')){swipeStart=null;return;}if(swipeTransitioning)return;swipeStart={x:e.clientX,y:e.clientY};});
+flip.addEventListener('pointercancel',()=>{swipeStart=null;});
+flip.addEventListener('pointerup',e=>{
+ if(!swipeStart)return;
+ const dx=e.clientX-swipeStart.x,dy=e.clientY-swipeStart.y;swipeStart=null;
+ if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.25){
+  if(!revealed){$('swipeHint').textContent='先にカードをタップして答えを確認してください。';return;}
+  if(current&&!current._sessionDone&&$('mode').value!=='choice'&&!swipeTransitioning){
+   swipeTransitioning=true;
+   const direction=dx>0?'study-card-swipe-right':'study-card-swipe-left';
+   flip.classList.remove('study-card-swipe-left','study-card-swipe-right');void flip.offsetWidth;flip.classList.add(direction);
+   record(dx>0,false,{deferCleanup:true});
+   // animationend is preferred; this fallback covers reduced-motion browsers.
+   swipeFallback=setTimeout(finishSwipeAnimation,430);
+  }
+ }
+});
+$('nextBtn').onclick=()=>{if(choiceTimer){clearTimeout(choiceTimer);choiceTimer=null;}if(!current){startSession();return;}setPrompt();};
+
+function addExtraField(key='',value=''){
+ const row=document.createElement('div');row.className='row extra-row';row.style.marginTop='8px';
+ const keyInput=document.createElement('input');keyInput.className='extra-key';keyInput.placeholder='項目名（例：発音）';keyInput.value=key;
+ const valueInput=document.createElement('input');valueInput.className='extra-value';valueInput.placeholder='内容';valueInput.value=value;
+ const remove=document.createElement('button');remove.className='danger small';remove.type='button';remove.textContent='削除';remove.onclick=()=>row.remove();
+ const a=document.createElement('div');a.className='field';a.appendChild(keyInput);const b=document.createElement('div');b.className='field';b.appendChild(valueInput);row.append(a,b,remove);$('extraFields').appendChild(row);
+}
+$('addExtraFieldBtn').onclick=()=>addExtraField();
+
+$('addBtn').onclick=()=>{
+ const front=$('front').value.trim(),back=$('back').value.trim();if(!front||!back){toast('単語と意味を入力してください。');return}const extra={};document.querySelectorAll('.extra-row').forEach(r=>{const k=r.querySelector('.extra-key').value.trim(),v=r.querySelector('.extra-value').value.trim();if(k&&v)extra[k]=v});
+ if(db.words.some(w=>w.subject===$('addSubject').value&&w.front.toLowerCase()===front.toLowerCase()&&w.back===back)){toast('同じ単語・意味が登録済みです。');return}
+ db.words.push({id:uid(),subject:$('addSubject').value,front,back,example:$('example').value.trim(),extra,createdAt:now(),nextAt:0,intervalDays:0,streak:0});
+ save();$('front').value='';$('back').value='';$('example').value='';$('extraFields').innerHTML='';renderWords();renderStats();startSession();toast('単語を追加しました。');
+};
+$('listSubject').onchange=()=>{selectedWordIds.clear();renderWords()};$('searchWords').oninput=()=>{selectedWordIds.clear();renderWords()};
+$('selectAllWords').onchange=()=>{document.querySelectorAll('.wordcheck').forEach(cb=>{cb.checked=$('selectAllWords').checked;if(cb.checked)selectedWordIds.add(cb.dataset.id);else selectedWordIds.delete(cb.dataset.id)});updateSelectionUI()};$('deleteSelectedBtn').onclick=()=>deleteWords([...selectedWordIds]);
+function renderDeckManagerList(){
+ const box=$('deckManagerList');if(!box)return;box.innerHTML='';
+ if(!db.subjects.length){box.textContent='単語帳がありません。';return}
+ const query=String($('deckManagerSearch')?.value||'').trim().toLowerCase();
+ const visible=db.subjects.filter(sub=>!query||sub.name.toLowerCase().includes(query)||String(sub.id).toLowerCase().includes(query));
+ $('deckManagerCount').textContent=`${visible.length}冊を表示中（全${db.subjects.length}冊）`;
+ visible.forEach(sub=>{
+  const words=db.words.filter(w=>w.subject===sub.id);const row=document.createElement('div');row.className='deck-row';
+  const top=document.createElement('div');top.className='row';
+  const inp=document.createElement('input');inp.className='deck-name-input';inp.value=sub.name;inp.setAttribute('aria-label','単語帳名');
+  const saveBtn=document.createElement('button');saveBtn.className='soft small';saveBtn.textContent='名前変更';saveBtn.onclick=()=>{const n=inp.value.trim();if(!n){toast('名前を入力してください。');return}if(db.subjects.some(s=>s.id!==sub.id&&s.name.toLowerCase()===n.toLowerCase())){toast('同じ名前の単語帳があります。');return}sub.name=n;save();renderSubjectOptions();renderDeckManagerList();renderWords();renderAnalysis();toast('単語帳名を変更しました。')};
+  const delBtn=document.createElement('button');delBtn.className='danger small';delBtn.textContent='削除';delBtn.onclick=()=>{if(['en','ko'].includes(sub.id)){toast('標準の英単語・古文単語は削除できません。');return}if(!confirm(`「${sub.name}」を削除しますか？この単語帳にコピーされた${words.length}語とその回答履歴が削除されます。元の単語は削除されません。`))return;const ids=new Set(words.map(w=>w.id));db.words=db.words.filter(w=>!ids.has(w.id));db.logs=db.logs.filter(l=>!ids.has(l.id));db.subjects=db.subjects.filter(s=>s.id!==sub.id);selectedWordIds.clear();save();renderSubjectOptions();renderWords();renderStats();renderAnalysis();renderDeckManagerList();startSession();toast('単語帳を削除しました。')};
+  top.append(inp,saveBtn,delBtn);row.appendChild(top);const meta=document.createElement('div');meta.className='muted tiny';meta.style.marginTop='6px';meta.textContent=`${words.length}語 · ${sub.generatedSimilar?'自動分類から作成':'通常の単語帳'}`;row.appendChild(meta);box.appendChild(row);
+ });
+}
+$('deckManagerSearch').oninput=renderDeckManagerList;
+$('addCategoryBtn').onclick=()=>{const name=$('newCategoryName').value.trim();if(!name){toast('単語帳の名前を入力してください。');return}if(db.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase())){toast('同じ名前の単語帳があります。');return}const id='cat_'+now().toString(36);db.subjects.push({id,name});save();renderSubjectOptions();renderDeckManagerList();$('subject').value=id;$('addSubject').value=id;$('importSubject').value=id;$('listSubject').value=id;$('newCategoryName').value='';renderWords();startSession();toast(`「${name}」を追加しました。`)};
+$('applyRangeBtn').onclick=()=>{sessionRange.start=Math.max(1,Number($('learnRangeStart').value)||1);sessionRange.end=$('learnRangeEnd').value?Math.max(sessionRange.start,Number($('learnRangeEnd').value)):'';$('rangeInfo').textContent=`${labelSub(subject())}：${sessionRange.start}番〜${sessionRange.end||'最後'}番を対象にします（番号は登録順、出題順は別設定）。`;startSession();toast('出題範囲を適用しました。')};$('showAllHistoryBtn').onclick=()=>{allHistoryVisible=!allHistoryVisible;renderAnalysis()};
+$('saveSettings').onclick=()=>{db.settings.newLimit=Math.max(0,Math.min(1000000,Number($('newLimit').value)||0));db.settings.rangeStart=Math.max(1,Number($('rangeStart').value)||1);db.settings.rangeEnd=$('rangeEnd').value?Math.max(1,Number($('rangeEnd').value)):'';save();startSession();toast('設定を保存しました。')};
+function parseCSV(text){
+ const rows=[];let row=[],cell='',q=false;
+ for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(q&&text[i+1]==='"'){cell+='"';i++}else q=!q}else if(c===','&&!q){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(x=>x.trim()))rows.push(row);row=[];cell=''}else cell+=c}
+ row.push(cell);if(row.some(x=>x.trim()))rows.push(row);return rows
+}
+function normHeader(v){return String(v??'').trim().toLowerCase().replace(/[\s_\-・:：]/g,'')}
+function headerRole(v){const h=normHeader(v);
+ if(/^(id|no|num|number|番号|通し番号|連番|行番号|#)$/.test(h)||/^(番号|通し番号|連番)/.test(h))return 'ignore';
+ if(/^(単語|英単語|古文単語|見出し語|word|vocab|vocabulary|term|front|question|表|語句|lemma|headword)$/.test(h))return 'front';
+ if(/^(意味|訳|日本語|和訳|意味訳|語義|meaning|translation|japanese|back|answer|definition|gloss|裏)$/.test(h))return 'back';
+ if(/^(例文|例|補足|備考|メモ|用例|example|sentence|note|notes|補助情報)$/.test(h))return 'example';
+ return '';
+}
+function detectColumns(rows){
+ const width=Math.max(0,...rows.slice(0,30).map(r=>r.length));let headers=(rows[0]||[]).map(x=>String(x??'').trim());
+ let headerRow=-1, roles={front:-1,back:-1,example:-1};
+ for(let ri=0;ri<Math.min(5,rows.length);ri++){
+  const rr=rows[ri]||[], found={front:-1,back:-1,example:-1};
+  rr.forEach((v,i)=>{const role=headerRole(v);if(role&&role!=='ignore'&&found[role]===-1)found[role]=i});
+  if(found.front>=0&&found.back>=0){headerRow=ri;roles=found;break}
+ }
+ if(headerRow>=0)headers=(rows[headerRow]||[]).map(x=>String(x??'').trim());
+ const dataStart=headerRow>=0?headerRow+1:0;
+ if(headerRow<0){
+  const sample=rows.slice(0,Math.min(15,rows.length));let scores=[];
+  for(let c=0;c<width;c++){
+   const vals=sample.map(r=>String(r[c]??'').trim()).filter(Boolean), nonnum=vals.filter(v=>!/^[\d０-９]+$/.test(v)).length;
+   const alpha=vals.filter(v=>/[a-zA-Zぁ-んァ-ヶ一-龠]/.test(v)).length;
+   scores.push({c,score:nonnum*2+alpha*2-(vals.length-nonnum)*4,vals});
+  }
+  // Number-like columns such as 1,2,3 are excluded; choose text-heavy columns.
+  const candidates=scores.filter(x=>x.vals.length&&x.score>0).sort((a,b)=>b.score-a.score);
+  const top=candidates.slice(0,Math.min(4,candidates.length)).sort((a,b)=>a.c-b.c);
+  roles.front=top[0]?.c??0;roles.back=top[1]?.c??(width>1?1:-1);roles.example=top[2]?.c??-1;
+ } else {
+  if(roles.example<0){for(let i=0;i<width;i++)if(i!==roles.front&&i!==roles.back&&headerRole(headers[i])==='example'){roles.example=i;break}}
+ }
+ const labels=Array.from({length:width},(_,i)=>`${i+1}列目${headers[i]?`（${headers[i]}）`:''}`);
+ return {width,headers,headerRow,dataStart,roles,labels};
+}
+function setupSelect(id,selected,allowNone=false){const el=$(id);el.innerHTML='';if(allowNone){const o=document.createElement('option');o.value='-1';o.textContent='指定しない';el.appendChild(o)}importHeaders.forEach((h,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=h;el.appendChild(o)});el.value=String(selected>=0?selected:(allowNone?-1:0));}
+let importMeta={dataStart:0};
+function readImportMappings(){return [...$('importExtraMappings').querySelectorAll('.import-map-row')].map(row=>({col:Number(row.querySelector('.import-extra-col').value),name:row.querySelector('.import-extra-name').value.trim()})).filter(x=>x.col>=0&&x.name&&![Number($('colFront').value),Number($('colBack').value),Number($('colExample').value)].includes(x.col));}
+function addImportMapping(col=-1,name=''){
+ const row=document.createElement('div');row.className='import-map-row';
+ const select=document.createElement('select');select.className='import-extra-col';const none=document.createElement('option');none.value='-1';none.textContent='列を選択';select.appendChild(none);importHeaders.forEach((h,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=h;select.appendChild(o)});select.value=String(col);
+ const input=document.createElement('input');input.className='import-extra-name';input.placeholder='保存する項目名';input.value=name;
+ const remove=document.createElement('button');remove.className='danger small';remove.type='button';remove.textContent='削除';remove.onclick=()=>{row.remove();renderImportPreview()};
+ select.onchange=renderImportPreview;input.oninput=renderImportPreview;row.append(select,input,remove);$('importExtraMappings').appendChild(row);
+}
+function resetImportMappings(d){
+ $('importExtraMappings').innerHTML='';let used=new Set([d.roles.front,d.roles.back,d.roles.example]);
+ for(let c=0;c<d.width;c++){if(used.has(c)||headerRole(d.headers[c])==='ignore')continue;const raw=String(d.headers[c]||'').trim();const name=raw||`追加項目${c+1}`;addImportMapping(c,name)}
+}
+function getMappedRows(){
+ const fi=Number($('colFront').value),bi=Number($('colBack').value),ei=Number($('colExample').value),extraMaps=readImportMappings();
+ return importRows.slice(importMeta.dataStart).map(r=>{const extra={};for(const m of extraMaps){const v=String(r[m.col]??'').trim();if(v)extra[m.name]=v;}return {front:String(r[fi]??'').trim(),back:String(r[bi]??'').trim(),example:ei>=0?String(r[ei]??'').trim():'',extra};}).filter(x=>x.front&&x.back)
+}
+function renderImportPreview(){if(!importRows.length)return;const rows=getMappedRows(),maps=readImportMappings();const heads=$('previewHeader');heads.innerHTML='';['単語','意味','補足',...maps.map(m=>m.name)].forEach(v=>{const th=document.createElement('th');th.textContent=v;heads.appendChild(th)});$('previewRows').innerHTML='';rows.slice(0,8).forEach(x=>{const tr=document.createElement('tr');[x.front,x.back,x.example,...maps.map(m=>x.extra[m.name]||'')].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td)});$('previewRows').appendChild(tr)});$('mappingNote').textContent=`読み込み対象の候補：${rows.length}行。追加項目は${maps.length}個設定されています。別の列・保存名に変更できます。`}
+['colFront','colBack','colExample'].forEach(id=>$(id).addEventListener('change',renderImportPreview));
+$('addImportMappingBtn').onclick=()=>{const used=new Set(readImportMappings().map(x=>x.col));let col=importHeaders.findIndex((_,i)=>!used.has(i)&&![Number($('colFront').value),Number($('colBack').value),Number($('colExample').value)].includes(i)&&headerRole(importMeta.headers?.[i])!=='ignore');addImportMapping(col>=0?col:-1,col>=0?(importMeta.headers[col]||`追加項目${col+1}`):'');renderImportPreview()};
+$('csvFile').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try {
+  let rows=[];
+  if(/\.(xlsx|xls)$/i.test(f.name)){
+   if(!window.XLSX)throw Error('Excel読み込みライブラリを取得できません。インターネット接続後に再読み込みするか、CSV形式で保存してください。');
+   const data=await f.arrayBuffer();const wb=XLSX.read(data,{type:'array'});const sheet=wb.Sheets[wb.SheetNames[0]];rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:false});
+  }else{let text=await f.text();if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);rows=parseCSV(text);}
+  rows=rows.filter(r=>Array.isArray(r)&&r.some(v=>String(v??'').trim()));if(!rows.length)throw Error('データが見つかりませんでした。');
+  importRows=rows;const d=detectColumns(rows);importMeta=d;importHeaders=d.labels;
+  setupSelect('colFront',d.roles.front);setupSelect('colBack',d.roles.back);setupSelect('colExample',d.roles.example,true);
+  if(Number($('colFront').value)===Number($('colBack').value))$('colBack').value=String(d.width>1?(Number($('colFront').value)===0?1:0):-1);
+  resetImportMappings(d);$('importPreview').classList.remove('hidden');$('importResult').textContent=`${f.name}：${d.width}列を検出。列を自動判定しました。`;renderImportPreview();
+ }catch(err){$('importResult').textContent=err.message||'読み込みに失敗しました。';$('importPreview').classList.add('hidden')}
+ e.target.value='';
+};
+$('importConfirm').onclick=()=>{
+ const fi=Number($('colFront').value),bi=Number($('colBack').value),ei=Number($('colExample').value);
+ if(fi<0||bi<0||fi===bi){toast('単語列と意味列を別々に指定してください。');return}
+ const extraMaps=readImportMappings();
+ const mapped=importRows.slice(importMeta.dataStart).map(r=>{const extra={};for(const m of extraMaps){const v=String(r[m.col]??'').trim();if(v)extra[m.name]=v;}return {front:String(r[fi]??'').trim(),back:String(r[bi]??'').trim(),example:ei>=0?String(r[ei]??'').trim():'',extra};}).filter(x=>x.front&&x.back);
+ let added=0,skip=0;const s=$('importSubject').value;
+ mapped.forEach(x=>{if(headerRole(x.front)==='front'&&headerRole(x.back)==='back'){skip++;return}if(db.words.some(w=>w.subject===s&&w.front.toLowerCase()===x.front.toLowerCase()&&w.back===x.back)){skip++;return}db.words.push({id:uid(),subject:s,front:x.front,back:x.back,example:x.example,extra:x.extra,createdAt:now(),nextAt:0,intervalDays:0,streak:0});added++});
+ save();$('importResult').textContent=`完了：${added}語を追加、${skip}行をスキップしました。`;renderStats();renderWords();startSession();$('importPreview').classList.add('hidden');toast(`${added}語を読み込みました。`);
+};
+function download(name,data,type='application/json'){
+ const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)
+}
+$('templateBtn').onclick=()=>download('kioku-lab-template.csv','単語,意味,補足\\nabandon,捨てる,abandon a plan\\nあはれなり,しみじみと趣深い,文脈に注意','text/csv;charset=utf-8');
+$('exportBtn').onclick=()=>download('kioku-lab-backup-'+dayKey()+'.json',JSON.stringify(db,null,2));
+$('jsonFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!Array.isArray(x.words)||!Array.isArray(x.logs))throw Error('形式');if(!confirm('現在のデータをバックアップの内容で置き換えますか？'))return;db={...x};save();$('backupResult').textContent='復元しました。';renderWords();renderStats();renderAnalysis();startSession()}catch(err){$('backupResult').textContent='読み込めませんでした。正しいJSONバックアップか確認してください。'}e.target.value=''};
+$('clearBtn').onclick=()=>{if(confirm('単語・回答履歴・設定をすべて削除します。この操作は取り消せません。')){localStorage.removeItem(KEY);db={version:2,words:[],logs:[],subjects:[{id:'en',name:'英単語'},{id:'ko',name:'古文単語'}],settings:{newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority'}};save();renderSubjectOptions();save();renderStats();renderWords();renderAnalysis();startSession();toast('データを削除しました。')}};
+function tick(){if(current&&!revealed)$('elapsed').textContent=`回答時間 ${((now()-startedAt)/1000).toFixed(1)}秒`}
+document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(e.code==='Space'){e.preventDefault();if(!revealed)reveal();else if(current&&current._sessionDone)setPrompt()}if(e.key==='ArrowRight'&&revealed){if(current&&!current._sessionDone)return;setPrompt()}})
+let deferredInstallPrompt=null;
+function updateInstallStatus(){
+ const status=$('installStatus'),btn=$('installAppBtn');
+ const standalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches;
+ if(standalone){status.textContent='ホーム画面からアプリとして起動しています。';btn.textContent='インストール済み';btn.disabled=true;return;}
+ btn.disabled=false;
+ if(deferredInstallPrompt){status.textContent='このページはインストールできます。ボタンを押すとChromeの確認画面が開きます。';btn.textContent='ホーム画面に追加';}
+ else if(location.protocol==='file:'){status.textContent='現在はダウンロードしたHTMLを直接開いています。この方法ではPWAインストール用の条件を満たしません。HTTPSで公開したURLから開く必要があります。';btn.textContent='追加方法を見る';}
+ else if(location.protocol==='https:'){status.textContent='Chromeのメニューに「アプリをインストール」または「ホーム画面に追加」が表示されていれば、そこから追加できます。';btn.textContent='追加方法を見る';}
+ else{status.textContent='PWAとしてのインストールにはHTTPSで公開されたURLが必要です。';btn.textContent='追加方法を見る';}
+}
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;updateInstallStatus();});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;updateInstallStatus();toast('ホーム画面への追加が完了しました。');});
+$('installAppBtn').addEventListener('click',async()=>{
+ if(deferredInstallPrompt){const promptEvent=deferredInstallPrompt;deferredInstallPrompt=null;try{await promptEvent.prompt();const result=await promptEvent.userChoice;if(result&&result.outcome==='accepted')toast('インストールを受け付けました。');else toast('インストールはキャンセルされました。');}catch(e){$('installInstructions').open=true;}updateInstallStatus();}
+ else{$('installInstructions').open=true;$('installInstructions').scrollIntoView({behavior:'smooth',block:'center'});}
+});
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+load();renderSubjectOptions();
+$('learnRangeStart').value=1;$('learnRangeEnd').value='';
+$('newLimit').value=Number.isFinite(Number(db.settings.newLimit))?db.settings.newLimit:0;$('rangeStart').value=db.settings.rangeStart||1;$('rangeEnd').value=db.settings.rangeEnd||'';$('studyOrder').value=db.settings.studyOrder==='random'?'random':'priority';
+updateModeLabels();
+renderStats();renderWords();renderAnalysis();renderDeckManagerList();startSession();updateInstallStatus();setInterval(tick,300);
+})();
+</script>
+</body>
+</html>
