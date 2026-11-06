@@ -29,7 +29,7 @@
 <section id="learn" class="panel active">
  <div class="card" style="padding:12px;margin-top:10px">
   <div class="sectiontitle">今回学習する範囲</div>
-  <div class="row"><div class="field"><label for="learnRangeStart">開始番号</label><input id="learnRangeStart" type="number" min="1" value="1"></div><div class="field"><label for="learnRangeEnd">終了番号</label><input id="learnRangeEnd" type="number" min="1" placeholder="最後まで"></div><button class="primary" id="applyRangeBtn">この範囲で学習</button></div>
+  <div class="row"><div class="field"><label for="learnRangeStart">開始番号</label><input id="learnRangeStart" type="number" min="1" value="1"></div><div class="field"><label for="learnRangeEnd">終了番号</label><input id="learnRangeEnd" type="number" min="1" placeholder="最後まで"></div><button class="primary" id="applyRangeBtn">この範囲で学習</button><button class="soft" id="reviewDueBtn" type="button">期限到来分を復習</button></div>
   <div class="muted tiny" id="rangeInfo">登録順の番号で範囲を指定できます。</div>
  </div>
  <div class="row" style="margin:10px 0 12px">
@@ -265,7 +265,7 @@ document.querySelectorAll('.tab[data-tab]').forEach(tab=>{
 });
 const now=()=>Date.now();
 let db={version:2,words:[],logs:[],subjects:[{id:'en',name:'英単語'},{id:'ko',name:'古文単語'}],settings:{newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority'},similarGroups:[]};
-let current=null, revealed=false, faceBack=false, choiceTimer=null, startedAt=0, sessionQueue=[], sessionDone=0, confidence=2, lastChoice=null, importRows=[], importHeaders=[], allHistoryVisible=false, selectedWordIds=new Set(), sessionRange={start:1,end:''}, similarCandidates=[], selectedSimilarIds=new Set(), similarSearchDone=false, swipeTransitioning=false, swipeFallback=null, compareSelectedIds=new Set(), comparePanelOpen=false, wordMapSelectedId=null;
+let current=null, revealed=false, faceBack=false, choiceTimer=null, startedAt=0, sessionQueue=[], sessionDone=0, sessionMode='all', confidence=2, lastChoice=null, importRows=[], importHeaders=[], allHistoryVisible=false, selectedWordIds=new Set(), sessionRange={start:1,end:''}, similarCandidates=[], selectedSimilarIds=new Set(), similarSearchDone=false, swipeTransitioning=false, swipeFallback=null, compareSelectedIds=new Set(), comparePanelOpen=false, wordMapSelectedId=null;
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.words)&&Array.isArray(x.logs)){db={...db,...x};if(Number(x.version||1)<2){db.settings={...(db.settings||{}),newLimit:0};db.version=2;}}db.settings={newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority',...(db.settings||{})};if(!Array.isArray(db.subjects))db.subjects=[{id:'en',name:'英単語'},{id:'ko',name:'古文単語'}];db.subjects.forEach(s=>{if(s.generatedSimilar&&typeof s.activeSimilar!=='boolean')s.activeSimilar=false});db.words.forEach(w=>{if(!db.subjects.some(s=>s.id===w.subject))db.subjects.push({id:w.subject,name:w.subject==='en'?'英単語':w.subject==='ko'?'古文単語':w.subject})});}catch(e){db.settings={newLimit:0,rangeStart:1,rangeEnd:'',studyOrder:'priority'};}}
 function save(){db.version=2;try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){toast('保存できません。端末の空き容量を確認してください。')}}
 function uid(){return 'w'+now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -314,24 +314,12 @@ function activeWords(s=subject()){
  const a=Math.max(1,Number(sessionRange.start)||1), b=Number(sessionRange.end)||Infinity;
  return arr.filter((w,i)=>i+1>=a&&i+1<=b);
 }
-function buildQueue(){
- const all=activeWords();const dueWords=all.filter(due).sort((a,b)=>priority(b)-priority(a));
- const fresh=all.filter(w=>!logsFor(w.id).length);
- const configured=Number(db.settings.newLimit);
- const limit=configured>0?configured:Infinity;
- const reviewCount=dueWords.length;
- // 0 means unlimited new words: no daily/session cap. A finite limit remains an optional user setting.
- const dynamicNew=limit===Infinity?Infinity:(reviewCount>80?0:reviewCount>40?Math.min(5,limit):reviewCount>20?Math.min(10,limit):limit);
- const chosenFresh=fresh.filter(w=>!dueWords.some(d=>d.id===w.id)).slice(0,dynamicNew);
- const review=dueWords.filter(w=>!fresh.some(f=>f.id===w.id));
- // Blend: 2 reviews then a new word, while maintaining review priority.
- let out=[],ri=0,ni=0;
- while(ri<review.length||ni<chosenFresh.length){
-   for(let j=0;j<2&&ri<review.length;j++)out.push(review[ri++]);
-   if(ni<chosenFresh.length)out.push(chosenFresh[ni++]);
- }
- // If nothing due and no fresh words, optionally offer lowest-priority words as practice.
- if(!out.length&&all.length)out=all.slice().sort((a,b)=>priority(b)-priority(a));
+function buildQueue(mode='all'){
+ const all=activeWords();
+ // 通常学習は範囲内の全単語。復習モードだけ期限到来語に限定する。
+ let out=mode==='due'
+  ?all.filter(due).sort((a,b)=>priority(b)-priority(a))
+  :all.slice().sort((a,b)=>priority(b)-priority(a));
  // 出題形式（英→日／日→英／四択）とは独立して、順序だけをシャッフルする。
  if($('studyOrder')?.value==='random'){
   for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}
@@ -342,6 +330,7 @@ function renderStats(){
  const s=subject(), all=db.words.filter(w=>w.subject===s);
  $('todayCount').textContent=db.logs.filter(l=>dayKey(l.time)===dayKey()).length;
  $('dueCount').textContent=all.filter(due).length;
+ const reviewBtn=$('reviewDueBtn');if(reviewBtn)reviewBtn.textContent=`期限到来分を復習（${activeWords(s).filter(due).length}語）`;
  $('totalCount').textContent=all.length;
  $('statAnswers').textContent=db.logs.length;
  $('statAccuracy').textContent=db.logs.length?Math.round(100*db.logs.filter(l=>l.correct).length/db.logs.length)+'%':'—';
@@ -393,7 +382,25 @@ function setPrompt(){
  revealed=false;faceBack=false;current=sessionQueue.find(w=>!w._sessionDone)||null;startedAt=now();confidence=2;lastChoice=null;comparePanelOpen=false;compareSelectedIds.clear();$('comparePanel').classList.add('hidden');
  $('answerArea').classList.add('hidden');$('choiceArea').classList.add('hidden');$('showRow').classList.add('hidden');$('nextRow').classList.add('hidden');$('hintLine').textContent='';
  $('elapsed').textContent='回答時間 0.0秒';
- if(!current){$('prompt').textContent='この一周は終了';$('tapNote').textContent='何周でも続けられます';$('wordTag').textContent=labelSub(subject());$('emptyState').classList.toggle('hidden',db.words.some(w=>w.subject===subject()));$('showRow').classList.add('hidden');$('sessionLabel').textContent='一周完了 · 学習回数に上限なし';$('sessionProgress').style.width='100%';$('queueLabel').textContent='';$('nextRow').classList.remove('hidden');$('nextBtn').textContent='もう一周する';renderStats();renderSimilar();return}
+ if(!current){
+  const rangeWords=activeWords(),subjectWords=db.words.filter(w=>w.subject===subject());
+  $('wordTag').textContent=labelSub(subject());$('showRow').classList.add('hidden');
+  $('sessionProgress').style.width=sessionQueue.length?'100%':'0%';$('queueLabel').textContent='';
+  if(!rangeWords.length){
+   $('prompt').textContent='出題対象がありません';$('tapNote').textContent='範囲を確認してください';
+   $('emptyState').textContent=subjectWords.length?'指定した範囲に単語がありません。開始番号・終了番号を確認してください。':'この単語帳に単語がありません。単語管理から追加するか、データ画面でCSVを読み込んでください。';
+   $('emptyState').classList.remove('hidden');$('sessionLabel').textContent='学習範囲に単語がありません';$('nextRow').classList.add('hidden');
+  }else if(sessionMode==='due'){
+   $('prompt').textContent='復習対象はありません';$('tapNote').textContent='期限が来た単語はありません';
+   $('emptyState').textContent='この範囲に期限到来の復習対象はありません。通常学習では全単語をいつでも学べます。';
+   $('emptyState').classList.remove('hidden');$('sessionLabel').textContent='復習対象 0語';$('nextRow').classList.remove('hidden');$('nextBtn').textContent='通常学習に戻る';
+  }else{
+   $('prompt').textContent='この一周は終了';$('tapNote').textContent='何周でも続けられます';
+   $('emptyState').classList.add('hidden');$('sessionLabel').textContent='一周完了 · 学習回数に上限なし';
+   $('nextRow').classList.remove('hidden');$('nextBtn').textContent='もう一周する';
+  }
+  renderStats();renderSimilar();return
+ }
  $('emptyState').classList.add('hidden');
  $('wordTag').textContent=labelSub(current.subject);
  const mode=$('mode').value;
@@ -458,7 +465,7 @@ function record(correct,keepChoiceReview=false,options={}){
  renderStats();renderWords();renderAnalysis();
 }
 function formatInterval(ms){if(ms<3600000)return Math.round(ms/60000)+'分後';if(ms<86400000)return Math.round(ms/3600000)+'時間後';return Math.round(ms/86400000)+'日後'}
-function startSession(){sessionQueue=buildQueue().map(w=>({...w,_sessionDone:false}));sessionDone=0;setPrompt()}
+function startSession(mode='all'){sessionMode=mode;sessionQueue=buildQueue(mode).map(w=>({...w,_sessionDone:false}));sessionDone=0;setPrompt()}
 function renderWords(){
  const s=$('listSubject').value,q=$('searchWords').value.trim().toLowerCase();
  const hiddenGenerated=new Set(db.subjects.filter(x=>x.generatedSimilar&&x.activeSimilar!==true).map(x=>x.id));const words=db.words.filter(w=>!hiddenGenerated.has(w.subject)&&(s==='all'||w.subject===s)&&(!q||(w.front+' '+w.back+' '+(w.example||'')+' '+Object.entries(w.extra||{}).map(([k,v])=>k+' '+v).join(' ')).toLowerCase().includes(q)));
@@ -741,7 +748,7 @@ flip.addEventListener('pointerup',e=>{
   }
  }
 });
-$('nextBtn').onclick=()=>{if(choiceTimer){clearTimeout(choiceTimer);choiceTimer=null;}if(!current){startSession();return;}setPrompt();};
+$('nextBtn').onclick=()=>{if(choiceTimer){clearTimeout(choiceTimer);choiceTimer=null;}if(!current){startSession(sessionMode==='due'?'all':sessionMode);return;}setPrompt();};
 
 function addExtraField(key='',value=''){
  const row=document.createElement('div');row.className='row extra-row';row.style.marginTop='8px';
@@ -777,7 +784,7 @@ function renderDeckManagerList(){
 }
 $('deckManagerSearch').oninput=renderDeckManagerList;
 $('addCategoryBtn').onclick=()=>{const name=$('newCategoryName').value.trim();if(!name){toast('単語帳の名前を入力してください。');return}if(db.subjects.some(s=>s.name.toLowerCase()===name.toLowerCase())){toast('同じ名前の単語帳があります。');return}const id='cat_'+now().toString(36);db.subjects.push({id,name});save();renderSubjectOptions();renderDeckManagerList();$('subject').value=id;$('addSubject').value=id;$('importSubject').value=id;$('listSubject').value=id;$('newCategoryName').value='';renderWords();startSession();toast(`「${name}」を追加しました。`)};
-$('applyRangeBtn').onclick=()=>{sessionRange.start=Math.max(1,Number($('learnRangeStart').value)||1);sessionRange.end=$('learnRangeEnd').value?Math.max(sessionRange.start,Number($('learnRangeEnd').value)):'';$('rangeInfo').textContent=`${labelSub(subject())}：${sessionRange.start}番〜${sessionRange.end||'最後'}番を対象にします（番号は登録順、出題順は別設定）。`;startSession();toast('出題範囲を適用しました。')};$('showAllHistoryBtn').onclick=()=>{allHistoryVisible=!allHistoryVisible;renderAnalysis()};
+$('applyRangeBtn').onclick=()=>{sessionRange.start=Math.max(1,Number($('learnRangeStart').value)||1);sessionRange.end=$('learnRangeEnd').value?Math.max(sessionRange.start,Number($('learnRangeEnd').value)):'';$('rangeInfo').textContent=`${labelSub(subject())}：${sessionRange.start}番〜${sessionRange.end||'最後'}番を対象にします（番号は登録順、出題順は別設定）。`;startSession('all');toast('出題範囲を適用しました。')};$('reviewDueBtn').onclick=()=>startSession('due');$('showAllHistoryBtn').onclick=()=>{allHistoryVisible=!allHistoryVisible;renderAnalysis()};
 $('saveSettings').onclick=()=>{db.settings.newLimit=Math.max(0,Math.min(1000000,Number($('newLimit').value)||0));db.settings.rangeStart=Math.max(1,Number($('rangeStart').value)||1);db.settings.rangeEnd=$('rangeEnd').value?Math.max(1,Number($('rangeEnd').value)):'';save();startSession();toast('設定を保存しました。')};
 function parseCSV(text){
  const rows=[];let row=[],cell='',q=false;
