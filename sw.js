@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kioku-lab-v12';
+const CACHE_NAME = 'kioku-lab-v13';
 const APP_SHELL = [
   './index.html',
   './kioku_lab_prototype.html',
